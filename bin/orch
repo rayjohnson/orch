@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'orch'
+
+Orch::Application.start(ARGV)
