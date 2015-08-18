@@ -1,24 +1,27 @@
 # Orch
 
-TODO: Write a gem description
+orch - uses a Yaml file to specify jobs that can be delpoyed to Mesos' Marathon and Chronos frameworks.
 
-## Installation
+## Installing this tool
 
-Add this line to your application's Gemfile:
-
-    gem 'orch'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install orch
+Run the following command
+$> gem install orch
+(Protip: you might need to sudo)
+Once the gem is installed, the command orch will be in your $PATH
 
 ## Usage
 
 TODO: Write usage instructions here
+
+## Job spec format
+
+TODO: describe the file
+
+## Configuration Options
+
+The file ~/.orch/config.yaml can contain the following values:
+cronos_url: http://my.instance.of.chronos
+marathon_url: http://my.instance.of.marathon
 
 ## Contributing
 

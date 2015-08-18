@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["rjohnson@yp.com"]
   spec.summary       = %q{orch uses yaml to deploy to Mesos' Marathon and Chronos frameworks}
   spec.description   = %q{orch uses yaml to deploy to Mesos' Marathon and Chronos frameworks}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/rayjohnson/orch"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")

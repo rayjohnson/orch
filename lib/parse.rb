@@ -12,6 +12,7 @@ module Orch
       end
       # TODO: try resecue for any syntax issues in yaml file
       yaml = ::YAML.load_file(path)
+      #puts yaml.to_json
 
       @options = options
 
@@ -40,12 +41,10 @@ module Orch
         @hasEnvironments = true
         spec.environments.each do |e|
           defined_environments[e] = e
-          puts "Env: #{e}"
         end
       end
 
       if (! spec.environments_var.nil?)
-        puts "has environments var: #{spec.environments_var}"
         @environments_var = spec.environments_var
       end
 
@@ -68,15 +67,24 @@ module Orch
           exit 1
         end
 
-        if !(@hasEnvironments && defined_environments.has_key?(app.environment))
-          puts "environment \"#{app.environment}\" not defined in environments"
-          exit 1
+        if @hasEnvironments
+          if !defined_environments.has_key?(app.environment)
+            puts "environment \"#{app.environment}\" not defined in environments"
+            exit 1
+          end
         end
 
         if (app.kind == "Chronos") && do_chronos?
-          puts "parsing chronos"
           chronos_spec = parse_chronos(app)
-          result = {:success => true, :type => :chronos, :json => chronos_spec.to_json}
+
+          result = {:name => cronos_spec.name, :success => true, :type => app.kind, :json => chronos_spec.to_json}
+          results << result
+        end
+
+        if (app.kind == "Marathon") && do_marathon?
+          marathon_spec = parse_marathon(app)
+
+          result = {:name => marathon_spec.id, :success => true, :type => app.kind, :json => marathon_spec.to_json}
           results << result
         end
       end
@@ -111,11 +119,49 @@ module Orch
         cronos_spec.environmentVariables << pair
       end
 
+      spec_str = cronos_spec.to_json.to_s.gsub(/{{ENV}}/, app.environment)
+      cronos_spec = Hashie::Mash.new(JSON.parse(spec_str))
+
       return cronos_spec
+    end
+
+    def parse_marathon(app)
+      # TODO: check if it exists
+      marathon_spec = app.marathon_spec
+
+      # This adds environment vaiables to the spec that conform to our docker-wrapper security hack
+      if ! app.vault.nil?
+        # TODO: check that an environment was defined
+        if (! @hasEnvironments) || app.environment.nil?
+          puts "the vault feature requires an environment to be set"
+          exit 1
+        end
+
+        count = 1
+        marathon_spec.env ||= {}
+        app.vault.each do |vault_key|
+          # Add an environment
+          marathon_spec.env["VAULT_KEY_#{count}"] = vault_key
+          count += 1
+        end
+      end
+
+      if (! @environments_var.nil?)
+        marathon_spec.env[@environments_var] = app.environment
+      end
+
+      spec_str = marathon_spec.to_json.to_s.gsub(/{{ENV}}/, app.environment)
+      marathon_spec = Hashie::Mash.new(JSON.parse(spec_str))
+
+      return marathon_spec
     end
 
     def do_chronos?
       return ['chronos', 'all'].include?(@options[:deploy_type])
+    end
+
+    def do_marathon?
+      return ['marathon', 'all'].include?(@options[:deploy_type])
     end
 
     def check_option_syntax

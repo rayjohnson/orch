@@ -14,9 +14,9 @@ module Orch
     def verify(file_name)
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(true)
+      puts "Number of configs found: #{result.length}"
       result.each do |app|
-        puts "#{app[:success]}"
-        puts "deploy to #{app[:type]}"
+        puts "Name: #{app[:name]}, Type: #{app[:type]}"
         puts "#{app[:json]}"
       end
     end
@@ -36,8 +36,11 @@ module Orch
 
       deploy = Orch::Deploy.new(options)
       result.each do |app|
-        if app[:type] == :chronos
+        if app[:type] == "Chronos"
           deploy.deploy_chronos(app[:json])
+        end
+        if app[:type] == "Marathon"
+          deploy.deploy_marathon(app[:json])
         end
         puts "deploy to #{app[:type]}"
         puts "#{app[:json]}"
