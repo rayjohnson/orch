@@ -1,15 +1,16 @@
 # config
 
 require 'json'
+require 'yaml'
 
 module Orch
   class Config
     def initialize(options)
       @options = options
 
-      config_path = "#{Dir.home}/.orch/config.yml"
-      if File.file?(config_path)
-        @APP_CONFIG = YAML.load_file(config_path)
+      @config_path = "#{Dir.home}/.orch/config.yml"
+      if File.file?(@config_path)
+        @APP_CONFIG = YAML.load_file(@config_path)
       else
         @APP_CONFIG = nil
       end
@@ -45,5 +46,18 @@ module Orch
       return @APP_CONFIG["marathon_url"]
     end
 
+    def setup_config(marathon_url, chronos_url)
+
+      if @APP_CONFIG.nil?
+        @APP_CONFIG = {}
+      end
+      @APP_CONFIG['marathon_url'] = marathon_url
+      @APP_CONFIG['chronos_url'] = chronos_url
+
+      if ! File.directory?("#{Dir.home}/.orch")
+        Dir.mkdir("#{Dir.home}/.orch")
+      end
+      File.open(@config_path, 'w') {|f| f.write @APP_CONFIG.to_yaml}
+    end
   end
 end

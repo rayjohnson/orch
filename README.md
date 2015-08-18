@@ -19,6 +19,9 @@ TODO: describe the file
 
 ## Configuration Options
 
+Run the following command to interactively create a config file.
+$> orch config
+
 The file ~/.orch/config.yaml can contain the following values:
 cronos_url: http://my.instance.of.chronos
 marathon_url: http://my.instance.of.marathon
