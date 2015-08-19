@@ -28,14 +28,16 @@ module Orch
 
     option :deploy_type, :default => 'all',
            :desc => 'chronos, marathon, all'
-    desc 'verify PATH', 'Checks syntax and does not deploy'
+    option :subst,
+           :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
+    desc 'verify PATH', 'Checks basic syntax and does not deploy'
     def verify(file_name)
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(true)
       puts "Number of configs found: #{result.length}"
       result.each do |app|
         puts "Name: #{app[:name]}, Type: #{app[:type]}"
-        puts "#{app[:json]}"
+        puts app[:json]
       end
     end
 
@@ -43,7 +45,11 @@ module Orch
            :desc => 'chronos, marathon, all'
     option :chronos_url,
            :desc => 'url to chronos master'
-    desc 'deploy PATH', 'Deploys config to mesos.  TODO write more'
+    option :marathon_url,
+           :desc => 'url to marathon master'
+    option :subst,
+           :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
+    desc 'deploy PATH', 'Deploys config to mesos frameworks.'
     def deploy(file_name)
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(false)

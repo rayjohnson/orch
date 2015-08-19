@@ -31,6 +31,7 @@ module Orch
       end
       if spec.version != "alpha1"
         puts "unsupported orch version specified: #{spec.version}"
+        puts "application only understands version alpha1"
         exit 1
       end
 
@@ -77,7 +78,10 @@ module Orch
         if (app.kind == "Chronos") && do_chronos?
           chronos_spec = parse_chronos(app)
 
-          result = {:name => cronos_spec.name, :success => true, :type => app.kind, :json => chronos_spec.to_json}
+          result = {:name => chronos_spec.name, :success => true, :type => app.kind, :json => chronos_spec.to_json}
+          if @hasEnvironments
+            result[:environment] = app.environment
+          end
           results << result
         end
 
@@ -85,6 +89,9 @@ module Orch
           marathon_spec = parse_marathon(app)
 
           result = {:name => marathon_spec.id, :success => true, :type => app.kind, :json => marathon_spec.to_json}
+          if @hasEnvironments
+            result[:environment] = app.environment
+          end
           results << result
         end
       end
@@ -119,7 +126,8 @@ module Orch
         cronos_spec.environmentVariables << pair
       end
 
-      spec_str = cronos_spec.to_json.to_s.gsub(/{{ENV}}/, app.environment)
+      # Do subst processing
+      spec_str = do_subst(cronos_spec, app)
       cronos_spec = Hashie::Mash.new(JSON.parse(spec_str))
 
       return cronos_spec
@@ -150,7 +158,7 @@ module Orch
         marathon_spec.env[@environments_var] = app.environment
       end
 
-      spec_str = marathon_spec.to_json.to_s.gsub(/{{ENV}}/, app.environment)
+      spec_str = do_subst(marathon_spec, app)
       marathon_spec = Hashie::Mash.new(JSON.parse(spec_str))
 
       return marathon_spec
@@ -162,6 +170,22 @@ module Orch
 
     def do_marathon?
       return ['marathon', 'all'].include?(@options[:deploy_type])
+    end
+
+    def do_subst(spec, app)
+      # {{ENV}} is a special value
+      spec_str = spec.to_json.to_s.gsub(/{{ENV}}/, app.environment)
+
+      if ! @options[:subst].nil?
+        puts "hello"
+        @options[:subst].split(",").each do |x|
+          pair = x.split("=")
+          puts "#{pair[0]}"
+          spec_str = spec_str.gsub(/{{#{pair[0]}}}/, pair[1])
+        end
+      end
+
+      return spec_str
     end
 
     def check_option_syntax

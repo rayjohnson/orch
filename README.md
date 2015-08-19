@@ -4,9 +4,13 @@ orch - uses a Yaml file to specify jobs that can be delpoyed to Mesos' Marathon 
 
 ## Installing this tool
 
-Run the following command
+Run the following command:
+```
+#!text
 $> gem install orch
-(Protip: you might need to sudo)
+```
+(you might need to sudo)
+
 Once the gem is installed, the command orch will be in your $PATH
 
 ## Usage
@@ -20,7 +24,10 @@ TODO: describe the file
 ## Configuration Options
 
 Run the following command to interactively create a config file.
+```
+#!text
 $> orch config
+```
 
 The file ~/.orch/config.yaml can contain the following values:
 cronos_url: http://my.instance.of.chronos
