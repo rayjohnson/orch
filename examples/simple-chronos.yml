@@ -1,0 +1,17 @@
+version: alpha1
+applications:
+  - kind: Chronos
+    cronos_spec:
+      name: "ray-test"
+      schedule: "R/2015-01-25T21:00/PT24H"
+      scheduleTimeZone: "PST"
+      owner: "rjohnson@yp.com"
+      container: 
+        type: "DOCKER"
+        image: "busybox"
+        network: "BRIDGE"
+      cpus: "0.5"
+      mem: "512"
+      uris: []
+      forcePullImage: true
+      command: "echo hello; sleep 10; echo bye"

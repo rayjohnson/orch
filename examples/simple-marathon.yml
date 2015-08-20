@@ -1,0 +1,28 @@
+version: alpha1
+environments_var: DEPLOY_ENV
+environments:
+  - dev
+  - test
+  - prod
+applications:
+  - kind: Marathon
+    environment: dev
+    marathon_spec:
+      id: "ray-web-{{ENV}}"
+      cpus: 0.1
+      mem: 300
+      instances: 10
+      env: 
+        FOO: "bar"
+      container: 
+        type: "DOCKER"
+        docker: 
+          image: "nginx"
+          network: "BRIDGE"
+          portMappings: 
+            - 
+              containerPort: 80
+              hostPort: 0
+              protocol: "tcp"
+          forcePullImage: true
+

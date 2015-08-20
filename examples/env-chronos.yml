@@ -1,0 +1,46 @@
+
+default_job: &DEFAULT_JOB
+  kind: Chronos
+  environment: override me
+  cronos_spec: &DEFAULT_SPEC
+    name: "ray-test-{{ENV}}"
+    schedule: "R/2015-01-25T21:00/PT24H"
+    scheduleTimeZone: "PST"
+    owner: "rjohnson@yp.com"
+    container: &DEFAULT_CONTAINER
+      type: "DOCKER"
+      image: "busybox"
+      network: "BRIDGE"
+    cpus: "0.5"
+    mem: "512"
+    uris: []
+    environmentVariables: 
+      - 
+        name: "LOG_LOCATION"
+        value: "/var/{{ENV}}"
+    forcePullImage: false
+    command: "echo \"log here: $LOG_LOCATION\"; echo \"ENV: $DEPLOY_ENV\";sleep 10; echo bye"
+
+version: alpha1
+environments_var: DEPLOY_ENV
+environments:
+  - dev
+  - test
+  - prod
+applications:
+  - <<: *DEFAULT_JOB
+    environment: dev
+    cronos_spec:
+      <<: *DEFAULT_SPEC
+      schedule: "R/2015-08-01T21:00/PT24H"
+      forcePullImage: true
+  - <<: *DEFAULT_JOB
+    environment: test
+    cronos_spec:
+      <<: *DEFAULT_SPEC
+      schedule: "R/2015-08-01T21:10/PT24H"
+  - <<: *DEFAULT_JOB
+    environment: prod
+    cronos_spec:
+      <<: *DEFAULT_SPEC
+      schedule: "R/2015-08-01T21:30/PT24H"

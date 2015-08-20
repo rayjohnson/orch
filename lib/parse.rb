@@ -3,7 +3,7 @@ require 'json'
 
 module Orch
   class Parse
-    attr_accessor :filter
+    attr_reader :hasEnvironments
 
     def initialize(path, options)
       if ! File.file?(path)
@@ -75,20 +75,20 @@ module Orch
           end
         end
 
-        if (app.kind == "Chronos") && do_chronos?
+        if (app.kind == "Chronos")
           chronos_spec = parse_chronos(app)
 
-          result = {:name => chronos_spec["name"], :type => app.kind, :json => chronos_spec}
+          result = {:name => chronos_spec["name"], :type => app.kind, :deploy => should_deploy?(app), :json => chronos_spec}
           if @hasEnvironments
             result[:environment] = app.environment
           end
           results << result
         end
 
-        if (app.kind == "Marathon") && do_marathon?
+        if (app.kind == "Marathon")
           marathon_spec = parse_marathon(app)
 
-          result = {:name => marathon_spec["id"], :type => app.kind, :json => marathon_spec}
+          result = {:name => marathon_spec["id"], :type => app.kind, :deploy => should_deploy?(app), :json => marathon_spec}
           if @hasEnvironments
             result[:environment] = app.environment
           end
@@ -164,12 +164,21 @@ module Orch
       return marathon_spec
     end
 
-    def do_chronos?
-      return ['chronos', 'all'].include?(@options[:deploy_type])
-    end
+    def should_deploy?(app)
+      result = true
+      if (app.kind == "Marathon") && @options[:deploy_type] == 'chronos'
+        result = false
+      end
+      if (app.kind == "Chronos") && @options[:deploy_type] == 'marathon'
+        result = false
+      end
+      if @options[:env_type] != 'all'
+        if @options[:env_type] != app.environment
+         result = false
+        end
+      end
 
-    def do_marathon?
-      return ['marathon', 'all'].include?(@options[:deploy_type])
+      return result
     end
 
     def do_subst(spec, app)

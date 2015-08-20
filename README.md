@@ -29,9 +29,7 @@ Run the following command to interactively create a config file.
 $> orch config
 ```
 
-The file ~/.orch/config.yaml can contain the following values:
-cronos_url: http://my.instance.of.chronos
-marathon_url: http://my.instance.of.marathon
+The file ~/.orch/config.yaml would contain values for "chronos_url" and "marathon_url".  You can also pass --chronos_url or --marathon_url options to the "orch deploy" command to override what is in the config file.
 
 ## Examples
 
