@@ -1,5 +1,6 @@
 require "orch/version"
 require 'hashie'
+require 'json'
 require 'thor'
 require "yaml"
 require "parse"
@@ -30,6 +31,8 @@ module Orch
            :desc => 'chronos, marathon, all'
     option :subst,
            :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
+    option :show_json, :default => false,
+           :desc => 'show the json result that would be sent to Chronos or Marathon'
     desc 'verify PATH', 'Checks basic syntax and does not deploy'
     def verify(file_name)
       parser = Orch::Parse.new(file_name, options)
@@ -37,7 +40,10 @@ module Orch
       puts "Number of configs found: #{result.length}"
       result.each do |app|
         puts "Name: #{app[:name]}, Type: #{app[:type]}"
-        puts app[:json]
+        if options[:show_json]
+          pretty = JSON.pretty_generate(app[:json])
+          puts "JSON: #{pretty}"
+        end
       end
     end
 

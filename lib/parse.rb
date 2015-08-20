@@ -78,7 +78,7 @@ module Orch
         if (app.kind == "Chronos") && do_chronos?
           chronos_spec = parse_chronos(app)
 
-          result = {:name => chronos_spec.name, :success => true, :type => app.kind, :json => chronos_spec.to_json}
+          result = {:name => chronos_spec["name"], :type => app.kind, :json => chronos_spec}
           if @hasEnvironments
             result[:environment] = app.environment
           end
@@ -88,7 +88,7 @@ module Orch
         if (app.kind == "Marathon") && do_marathon?
           marathon_spec = parse_marathon(app)
 
-          result = {:name => marathon_spec.id, :success => true, :type => app.kind, :json => marathon_spec.to_json}
+          result = {:name => marathon_spec["id"], :type => app.kind, :json => marathon_spec}
           if @hasEnvironments
             result[:environment] = app.environment
           end
@@ -128,7 +128,7 @@ module Orch
 
       # Do subst processing
       spec_str = do_subst(cronos_spec, app)
-      cronos_spec = Hashie::Mash.new(JSON.parse(spec_str))
+      cronos_spec = JSON.parse(spec_str)
 
       return cronos_spec
     end
@@ -159,7 +159,7 @@ module Orch
       end
 
       spec_str = do_subst(marathon_spec, app)
-      marathon_spec = Hashie::Mash.new(JSON.parse(spec_str))
+      marathon_spec = JSON.parse(spec_str)
 
       return marathon_spec
     end
@@ -177,10 +177,8 @@ module Orch
       spec_str = spec.to_json.to_s.gsub(/{{ENV}}/, app.environment)
 
       if ! @options[:subst].nil?
-        puts "hello"
         @options[:subst].split(",").each do |x|
           pair = x.split("=")
-          puts "#{pair[0]}"
           spec_str = spec_str.gsub(/{{#{pair[0]}}}/, pair[1])
         end
       end
