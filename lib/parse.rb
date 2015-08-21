@@ -11,7 +11,12 @@ module Orch
         exit 1
       end
       # TODO: try resecue for any syntax issues in yaml file
-      yaml = ::YAML.load_file(path)
+      begin
+        yaml = ::YAML.load_file(path)
+      rescue Psych::SyntaxError => e
+        puts "error parsing yaml file #{e}"
+        exit 1
+      end
       #puts yaml.to_json
 
       @options = options
