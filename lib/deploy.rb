@@ -79,6 +79,7 @@ module Orch
           end
           next
         end
+        # TODO: not sure how to compare arrays
         specVal = spec[key]
         jobVal = job[key]
         if spec[key].to_s.numeric?
@@ -89,7 +90,7 @@ module Orch
           jobVal = job[key]
         end
         if specVal != jobVal
-          puts "#{key}= spec:#{spec[key]}, server:#{job[key]}"
+          puts "#{key}= spec:#{specVal}, server:#{jobVal}"
           foundDiff = true
         end
       end
@@ -101,9 +102,8 @@ module Orch
       uri = URI(@config.marathon_url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
-
-      # curl -L -H 'Content-Type: application/json' -X POST -d @$schedule_file $CHRONOS_URL/scheduler/iso8601
       puts uri
+
       http = Net::HTTP.new(uri.host, uri.port)
       response = http.put("/v2/apps/#{json_payload["id"]}", json_payload, json_headers)
 
@@ -117,5 +117,33 @@ module Orch
 
       return response
     end
+
+    def verify_marathon(json_payload)
+      spec = Hashie::Mash.new(JSON.parse(json_payload))
+
+      uri = URI(@config.marathon_url)
+      json_headers = {"Content-Type" => "application/json",
+                "Accept" => "application/json"}
+
+      http = Net::HTTP.new(uri.host, uri.port)
+      response = http.get("/v2/apps/#{spec.id}", json_headers)
+
+      # puts "Response #{response.code} #{response.message}: #{response.body}"
+
+      if response.code == 404.to_s
+        puts "job: #{spec.id} - is not deployed"
+        return
+      end
+
+      if response.code == 200.to_s
+        job = Hashie::Mash.new(JSON.parse(response.body))
+        foundDiffs = find_diffs(spec, job.app)
+      end
+
+      # TODO: handle error codes
+
+      return response
+    end
+
   end
 end

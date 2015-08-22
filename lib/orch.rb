@@ -54,6 +54,9 @@ module Orch
         if app[:type] == "Chronos"
           deploy.verify_chronos(app[:json].to_json)
         end
+        if app[:type] == "Marathon"
+          deploy.verify_marathon(app[:json].to_json)
+        end
       end
     end
 
