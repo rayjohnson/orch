@@ -14,9 +14,9 @@ Once the gem is installed, the command orch will be in your $PATH
 
 ## Usage
 
-Type "orch help" to get the list of commands and "orch help <command>" to get list of options for a given command.
+Type "orch help" to get the list of commands and "orch help _command_" to get list of options for a given command.
 
-The general usecase is to run "orch deploy <job_spec>" to deploy a configuration to to Marathon or Chronos.  A given job_spec can contain specifications for many jobs and for multiple environments.  Various options to the deploy command gives control to exactly what is deployed. 
+The general usecase is to run "orch deploy _job_spec_" to deploy a configuration to to Marathon or Chronos.  A given job_spec can contain specifications for many jobs and for multiple environments.  Various options to the deploy command gives control to exactly what is deployed. 
 
 ## Job spec format
 
@@ -34,7 +34,7 @@ The file ~/.orch/config.yaml would contain values for "chronos_url" and "maratho
 ## Examples
 
 The examples directory contains various examples of the features of orch.  
-View [documentation tehre](examples/Examples.md) for more details.
+View [documentation there](examples/Examples.md) for more details.
 
 ## Contributing
 
