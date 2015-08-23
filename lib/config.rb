@@ -16,6 +16,22 @@ module Orch
       end
     end
 
+    def check_for_chronos_url
+      if (!  @options.has_key?("chronos_url")) && (@APP_CONFIG.nil? || @APP_CONFIG["chronos_url"].nil?)
+        return false
+      else
+        return true
+      end
+    end
+
+    def check_for_marathon_url
+      if (!  @options.has_key?("marathon_url")) && (@APP_CONFIG.nil? || @APP_CONFIG["marathon_url"].nil?)
+        return false
+      else
+        return true
+      end
+    end
+
     def chronos_url
       if @options.has_key?("chronos_url")
         # If passed in on command line override what is in config file

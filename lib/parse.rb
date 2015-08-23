@@ -3,7 +3,6 @@ require 'json'
 
 module Orch
   class Parse
-    attr_reader :hasEnvironments
 
     def initialize(path, options)
       if ! File.file?(path)
@@ -40,19 +39,8 @@ module Orch
         exit 1
       end
 
-      # Does this config support environments
-      @hasEnvironments = false
-      defined_environments = {}
-      if (! spec.environments.nil?)
-        @hasEnvironments = true
-        spec.environments.each do |e|
-          defined_environments[e] = e
-        end
-      end
-
-      if (! spec.environments_var.nil?)
-        @environments_var = spec.environments_var
-      end
+      # Check for vault vars
+      env_var_values = parse_vault_vars(@spec)
 
       if spec.applications.nil?
         puts "required section applications: must have at least one application defined"
@@ -67,36 +55,25 @@ module Orch
           exit 1
         end
 
-
         if !(app.kind == "Chronos" || app.kind == "Marathon")
           puts "unsupported kind specified: #{app.kind} - must be: Chronos | Marathon"
           exit 1
         end
 
-        if @hasEnvironments
-          if !defined_environments.has_key?(app.environment)
-            puts "environment \"#{app.environment}\" not defined in environments"
-            exit 1
-          end
-        end
+        # Generate any environment variables that need to be merged in
+        env_var_values = env_var_values.merge(parse_env_vars(app))
 
         if (app.kind == "Chronos")
-          chronos_spec = parse_chronos(app)
+          chronos_spec = parse_chronos(app, env_var_values)
 
           result = {:name => chronos_spec["name"], :type => app.kind, :deploy => should_deploy?(app), :json => chronos_spec}
-          if @hasEnvironments
-            result[:environment] = app.environment
-          end
           results << result
         end
 
         if (app.kind == "Marathon")
-          marathon_spec = parse_marathon(app)
+          marathon_spec = parse_marathon(app, env_var_values)
 
           result = {:name => marathon_spec["id"], :type => app.kind, :deploy => should_deploy?(app), :json => marathon_spec}
-          if @hasEnvironments
-            result[:environment] = app.environment
-          end
           results << result
         end
       end
@@ -104,31 +81,46 @@ module Orch
       return results
     end
 
-    def parse_chronos(app)
-      # TODO: check if it exists
-      cronos_spec = app.cronos_spec
-
-      # This adds environment vaiables to the spec that conform to our docker-wrapper security hack
-      if ! app.vault.nil?
-        # TODO: check that an environment was defined
-        if (! @hasEnvironments) || app.environment.nil?
-          puts "the vault feature requires an environment to be set"
-          exit 1
-        end
-
-        count = 1
-        cronos_spec.environmentVariables ||= []
-        app.vault.each do |vault_key|
-          # Add an environment
-          pair = {"name" => "VAULT_KEY_#{count}", "value" => vault_key}
-          count += 1
-          cronos_spec.environmentVariables << pair
+    def parse_env_vars(app)
+      result = {}
+      if (! @spec.environment_vars.nil?)
+        @spec.environment_vars.each do |key, value|
+          if app[key].nil?
+            puts "environments_var #{key} specified - but not included in app"
+            # TODO: would be nice to put the app name...
+            exit 1
+          end
+          if ! @spec.environment_vars[key].include? app[key]
+            puts "#{key} value \"#{app[key]}\" not in #{@spec.environment_vars[key].to_s}"
+            exit 1
+          end
+          result[key] = app[key]
         end
       end
 
-      if (! @environments_var.nil?)
-        pair = {"name" => @environments_var, "value" => app.environment}
-        cronos_spec.environmentVariables << pair
+      return result
+    end
+
+    def parse_vault_vars(spec)
+      result = {}
+      if ! spec.vault.nil?
+        count = 1
+        spec.vault.each do |vault_key|
+          result["VAULT_KEY_#{count}"] = vault_key
+          count += 1
+        end
+      end
+      return result
+    end
+
+    def parse_chronos(app, env_var_values)
+      # TODO: check if it exists
+      cronos_spec = app.cronos_spec
+
+      # Augment any spec environment variables with meta values
+      env_var_values.each do |key, value|
+        pair = {"name" => key, "value" => value}
+        cronos_spec.environmentVariables << pair        
       end
 
       # Do subst processing
@@ -138,29 +130,13 @@ module Orch
       return cronos_spec
     end
 
-    def parse_marathon(app)
+    def parse_marathon(app, env_var_values)
       # TODO: check if it exists
       marathon_spec = app.marathon_spec
 
-      # This adds environment vaiables to the spec that conform to our docker-wrapper security hack
-      if ! app.vault.nil?
-        # TODO: check that an environment was defined
-        if (! @hasEnvironments) || app.environment.nil?
-          puts "the vault feature requires an environment to be set"
-          exit 1
-        end
-
-        count = 1
-        marathon_spec.env ||= {}
-        app.vault.each do |vault_key|
-          # Add an environment
-          marathon_spec.env["VAULT_KEY_#{count}"] = vault_key
-          count += 1
-        end
-      end
-
-      if (! @environments_var.nil?)
-        marathon_spec.env[@environments_var] = app.environment
+      # Augment any spec environment variables with meta values
+      env_var_values.each do |key, value|
+        marathon_spec.env[key] = value     
       end
 
       spec_str = do_subst(marathon_spec, app)
@@ -187,9 +163,16 @@ module Orch
     end
 
     def do_subst(spec, app)
-      # {{ENV}} is a special value
-      spec_str = spec.to_json.to_s.gsub(/{{ENV}}/, app.environment)
+      spec_str = spec.to_json.to_s
 
+      # Subst any of the environment_vars values
+      if (! @spec.environment_vars.nil?)
+        @spec.environment_vars.each do |key, value|
+          spec_str = spec_str.gsub(/{{#{key}}}/, app[key])
+        end
+      end
+
+      # Subst any values that were passed in via command line
       if ! @options[:subst].nil?
         @options[:subst].split(",").each do |x|
           pair = x.split("=")

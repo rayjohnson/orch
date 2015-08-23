@@ -42,11 +42,7 @@ module Orch
       puts "Number of configs found: #{result.length}"
       deploy = Orch::Deploy.new(options)
       result.each do |app|
-        if parser.hasEnvironments
-          puts "Name: #{app[:name]}, Type: #{app[:type]}, Would deploy: #{app[:deploy]}, Environment: #{app[:environment]}"
-        else
-          puts "Name: #{app[:name]}, Type: #{app[:type]}, Would deploy: #{app[:deploy]}"
-        end
+        puts "Name: #{app[:name]}, Type: #{app[:type]}, Would deploy: #{app[:deploy]}"
         if options[:show_json]
           pretty = JSON.pretty_generate(app[:json])
           puts "JSON: #{pretty}"

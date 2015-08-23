@@ -1,14 +1,14 @@
 version: alpha1
-environments_var: DEPLOY_ENV
-environments:
-  - dev
-  - test
-  - prod
+environment_vars:
+  DEPLOY_ENV:
+    - dev
+    - test
+    - prod
 applications:
   - kind: Marathon
-    environment: dev
+    DEPLOY_ENV: dev
     marathon_spec:
-      id: "ray-web-{{ENV}}"
+      id: "ray-web-{{DEPLOY_ENV}}"
       cpus: 0.1
       mem: 300
       instances: 10

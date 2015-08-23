@@ -36,6 +36,11 @@ module Orch
     end
 
     def verify_chronos(json_payload)
+      if @config.check_for_chronos_url == false
+        puts "no chronos_url - can not verify with server"
+        return
+      end
+
       spec = Hashie::Mash.new(JSON.parse(json_payload))
 
       uri = URI(@config.chronos_url)
@@ -119,6 +124,11 @@ module Orch
     end
 
     def verify_marathon(json_payload)
+      if @config.check_for_marathon_url == false
+        puts "no marathon_url - can not verify with server"
+        return
+      end
+
       spec = Hashie::Mash.new(JSON.parse(json_payload))
 
       uri = URI(@config.marathon_url)
