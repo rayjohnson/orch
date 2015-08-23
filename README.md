@@ -33,7 +33,8 @@ The file ~/.orch/config.yaml would contain values for "chronos_url" and "maratho
 
 ## Examples
 
-TODO: show some examples
+The examples directory contains various examples of the features of orch.  
+View [documentation tehre](examples/Examples.md) for more details.
 
 ## Contributing
 
