@@ -27,14 +27,16 @@ module Orch
       config.setup_config(marathon_url, chronos_url)
     end
 
-    option :deploy_type, :default => 'all',
-           :desc => 'chronos, marathon, all'
-    option :env_type, :default => 'all',
-           :desc => 'a valid environment defined in your config or all to deploy to all environments'
+    option :deploy_kind, :default => 'all',
+           :desc => 'deploys only the given application kind: chronos, marathon, all'
+    option :deploy_env, :default => 'all',
+           :desc => 'ENV_VAR=VALUE deploys only if an environment_var matches the given value'
     option :subst,
            :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
     option :show_json, :default => false,
            :desc => 'show the json result that would be sent to Chronos or Marathon'
+    option :server_verify, :default => true,
+           :desc => 'verify the configuration against the server'
     desc 'verify PATH', 'Checks basic syntax and does not deploy'
     def verify(file_name)
       parser = Orch::Parse.new(file_name, options)
@@ -42,24 +44,28 @@ module Orch
       puts "Number of configs found: #{result.length}"
       deploy = Orch::Deploy.new(options)
       result.each do |app|
-        puts "Name: #{app[:name]}, Type: #{app[:type]}, Would deploy: #{app[:deploy]}"
+        printf "Name: %s, Type: %s, Deploy?: %s", app[:name], app[:type], app[:deploy]
+        app[:env_vars].each do |key, value|
+          printf ", %s: %s", key, value
+        end
+        printf "\n"
         if options[:show_json]
           pretty = JSON.pretty_generate(app[:json])
           puts "JSON: #{pretty}"
         end
-        if app[:type] == "Chronos"
+        if (app[:type] == "Chronos") && (options[:server_verify] == true)
           deploy.verify_chronos(app[:json].to_json)
         end
-        if app[:type] == "Marathon"
+        if (app[:type] == "Marathon") && (options[:server_verify] == true)
           deploy.verify_marathon(app[:json].to_json)
         end
       end
     end
 
-    option :deploy_type, :default => 'all',
-           :desc => 'chronos, marathon, all'
-    option :env_type, :default => 'all',
-           :desc => 'a valid environment defined in your config or all to deploy to all environments'
+    option :deploy_kind, :default => 'all',
+           :desc => 'deploys only the given application kind: chronos, marathon, all'
+    option :deploy_env, :default => 'all',
+           :desc => 'ENV_VAR=VALUE deploys only if an environment_var matches the given value'
     option :chronos_url,
            :desc => 'url to chronos master'
     option :marathon_url,

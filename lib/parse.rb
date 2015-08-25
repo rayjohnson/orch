@@ -51,7 +51,7 @@ module Orch
       spec.applications.each do |app|
         # Check for valid kind paramter
         if app.kind.nil?
-          puts "required field kind was not found"
+          puts "required field 'kind:' was not found"
           exit 1
         end
 
@@ -61,19 +61,20 @@ module Orch
         end
 
         # Generate any environment variables that need to be merged in
-        env_var_values = env_var_values.merge(parse_env_vars(app))
+        spec_env_vars = parse_env_vars(app)
+        env_var_values = env_var_values.merge(spec_env_vars)
 
         if (app.kind == "Chronos")
           chronos_spec = parse_chronos(app, env_var_values)
 
-          result = {:name => chronos_spec["name"], :type => app.kind, :deploy => should_deploy?(app), :json => chronos_spec}
+          result = {:name => chronos_spec["name"], :type => app.kind, :deploy => should_deploy?(app), :env_vars => env_var_values, :json => chronos_spec}
           results << result
         end
 
         if (app.kind == "Marathon")
           marathon_spec = parse_marathon(app, env_var_values)
 
-          result = {:name => marathon_spec["id"], :type => app.kind, :deploy => should_deploy?(app), :json => marathon_spec}
+          result = {:name => marathon_spec["id"], :type => app.kind, :deploy => should_deploy?(app), :env_vars => env_var_values, :json => marathon_spec}
           results << result
         end
       end
@@ -147,15 +148,25 @@ module Orch
 
     def should_deploy?(app)
       result = true
-      if (app.kind == "Marathon") && @options[:deploy_type] == 'chronos'
+      if (app.kind == "Marathon") && @options[:deploy_kind] == 'chronos'
         result = false
       end
-      if (app.kind == "Chronos") && @options[:deploy_type] == 'marathon'
+      if (app.kind == "Chronos") && @options[:deploy_kind] == 'marathon'
         result = false
       end
-      if @options[:env_type] != 'all'
-        if @options[:env_type] != app.environment
-         result = false
+
+      if @options[:deploy_env] != 'all'
+        @options[:deploy_env].split(",").each do |x|
+          pair = x.split("=")
+          envVar = pair[0]
+          envVal = pair[1]
+          if app[envVar].nil?
+            puts "environment var of '#{envVar}' not found in app"
+            exit 1
+          end
+          if app[envVar] != envVal
+            result = false
+          end
         end
       end
 
@@ -188,8 +199,8 @@ module Orch
         return
       end
 
-      if ! ['chronos', 'marathon', 'all'].include?(@options[:deploy_type])
-        puts "value of --deploy-type was #{@options[:deploy_type]}, must be chronos, marathon or all"
+      if ! ['chronos', 'marathon', 'all'].include?(@options[:deploy_kind])
+        puts "value of --deploy-type was #{@options[:deploy_kind]}, must be chronos, marathon or all"
         exit 1
       end
     end
