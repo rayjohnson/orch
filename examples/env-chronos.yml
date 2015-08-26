@@ -2,7 +2,7 @@
 default_job: &DEFAULT_JOB
   kind: Chronos
   environment: override me
-  cronos_spec: &DEFAULT_SPEC
+  chronos_spec: &DEFAULT_SPEC
     name: "ray-test-{{DEPLOY_ENV}}"
     schedule: "R/2015-01-25T21:00/PT24H"
     scheduleTimeZone: "PST"
@@ -32,31 +32,27 @@ environment_vars:
     - east
 applications:
   - <<: *DEFAULT_JOB
-    environment: dev
     DEPLOY_ENV: dev
     COLO: east
-    cronos_spec:
+    chronos_spec:
       <<: *DEFAULT_SPEC
       schedule: "R/2015-08-01T21:00/PT24H"
       forcePullImage: true
   - <<: *DEFAULT_JOB
-    environment: test
     DEPLOY_ENV: test
     COLO: east
-    cronos_spec:
+    chronos_spec:
       <<: *DEFAULT_SPEC
       schedule: "R/2015-08-01T21:10/PT24H"
   - <<: *DEFAULT_JOB
-    environment: prod
     DEPLOY_ENV: prod
     COLO: east
-    cronos_spec:
+    chronos_spec:
       <<: *DEFAULT_SPEC
       schedule: "R/2015-08-01T21:30/PT24H"
   - <<: *DEFAULT_JOB
-    environment: prod
     DEPLOY_ENV: prod
     COLO: west
-    cronos_spec:
+    chronos_spec:
       <<: *DEFAULT_SPEC
       schedule: "R/2015-08-01T21:30/PT24H"

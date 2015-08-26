@@ -20,7 +20,26 @@ The general usecase is to run "orch deploy _job_spec_" to deploy a configuration
 
 ## Job spec format
 
-TODO: describe the file
+The orch Yaml format is really a wrapper for multiple Marathon or Chronos job descriptions.  The format is based on yaml.  To get a basic understanding of Yaml files check out: http://www.yaml.org/start.html
+
+The basic orch syntax is as follows:
+```
+version: alpha1
+applications:
+  - kind: Chronos
+    chronos_spec:
+```
+
+The version: field must currently always be alpha1.  Eventually, this tool may need to support a revised format and this can be used to support multiple versions.
+
+The applications: field contains an array of Chronos or Marathon configurations.  Each array must have a kind: field with a value of Chronos or Marathon which simply tells orch what type of config this is.  Depending on the value of kind: a field of chronos_spec: or marathon_spec: is also required.
+
+The values of chronos_spec: should simply be the yaml equivelent of the chronos json messages.  You can find documentation for chronos json format here: https://mesos.github.io/chronos/docs/api.html
+
+
+Likewise, the values of marathon_spec: should simply be the yaml equivelent of the marathon json messages.  You can find documentation for marathon json format here: https://mesosphere.github.io/marathon/docs/rest-api.html
+
+TODO: finish this section
 
 ## Configuration Options
 

@@ -116,19 +116,22 @@ module Orch
 
     def parse_chronos(app, env_var_values)
       # TODO: check if it exists
-      cronos_spec = app.cronos_spec
+      chronos_spec = app.chronos_spec
 
       # Augment any spec environment variables with meta values
+      if chronos_spec.environmentVariables.nil?
+        chronos_spec.environmentVariables = []
+      end
       env_var_values.each do |key, value|
         pair = {"name" => key, "value" => value}
-        cronos_spec.environmentVariables << pair        
+        chronos_spec.environmentVariables << pair        
       end
 
       # Do subst processing
-      spec_str = do_subst(cronos_spec, app)
-      cronos_spec = JSON.parse(spec_str)
+      spec_str = do_subst(chronos_spec, app)
+      chronos_spec = JSON.parse(spec_str)
 
-      return cronos_spec
+      return chronos_spec
     end
 
     def parse_marathon(app, env_var_values)
