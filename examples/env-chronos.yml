@@ -10,7 +10,6 @@ default_job: &DEFAULT_JOB
       type: "DOCKER"
       image: "busybox"
       network: "BRIDGE"
-      forcePullImage: false
     cpus: "0.5"
     mem: "512"
     uris: []
@@ -40,9 +39,6 @@ applications:
     chronos_spec:
       <<: *DEFAULT_SPEC
       schedule: "R/2015-08-01T21:00/PT24H"
-      container:
-        <<: *DEFAULT_CONTAINER
-        forcePullImage: true
   - <<: *DEFAULT_JOB
     DEPLOY_ENV: test
     COLO: east

@@ -35,6 +35,24 @@ module Orch
       return response
     end
 
+    def delete_chronos(name)
+      uri = URI(@config.chronos_url)
+      json_headers = {"Content-Type" => "application/json",
+                "Accept" => "application/json"}
+
+      # curl -L -X DELETE chronos-node:8080/scheduler/job/request_event_counter_hourly
+      http = Net::HTTP.new(uri.host, uri.port)
+      response = http.delete("/scheduler/job/#{name}", json_headers)
+
+      if response.code != 204.to_s
+        puts "Response #{response.code} #{response.message}: #{response.body}"
+      end
+
+      # TODO: handle error codes better?
+
+      return response
+    end
+
     def verify_chronos(json_payload)
       if @config.check_for_chronos_url == false
         puts "no chronos_url - can not verify with server"
@@ -86,6 +104,26 @@ module Orch
       puts "Response #{response.code} #{response.message}: #{response.body}"
 
       if response.code == 204.to_s
+        puts "success"
+      end
+
+      # TODO: handle error codes
+
+      return response
+    end
+
+    def delete_marathon(id)
+      uri = URI(@config.marathon_url)
+      json_headers = {"Content-Type" => "application/json",
+                "Accept" => "application/json"}
+      puts uri
+
+      http = Net::HTTP.new(uri.host, uri.port)
+      response = http.delete("/v2/apps/#{id}", json_headers)
+
+      puts "Response #{response.code} #{response.message}: #{response.body}"
+
+      if response.code == 200.to_s
         puts "success"
       end
 

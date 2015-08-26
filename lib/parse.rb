@@ -125,7 +125,10 @@ module Orch
     end
 
     def parse_chronos(app, env_var_values)
-      # TODO: check if it exists
+      if app.chronos_spec.nil?
+        puts "App of kind: Chronos requires a 'chronos_spec:' field"
+        exit 1
+      end
       chronos_spec = app.chronos_spec
 
       # Augment any spec environment variables with meta values
@@ -145,7 +148,10 @@ module Orch
     end
 
     def parse_marathon(app, env_var_values)
-      # TODO: check if it exists
+      if app.marathon_spec.nil?
+        puts "App of kind: Marathon requires a 'marathon_spec:' field"
+        exit 1
+      end
       marathon_spec = app.marathon_spec
 
       # Augment any spec environment variables with meta values
@@ -168,8 +174,8 @@ module Orch
         result = false
       end
 
-      if @options[:deploy_env] != 'all'
-        @options[:deploy_env].split(",").each do |x|
+      if @options[:deploy_var] != 'all'
+        @options[:deploy_var].split(",").each do |x|
           pair = x.split("=")
           deployVar = pair[0]
           deployVal = pair[1]

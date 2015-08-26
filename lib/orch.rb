@@ -98,5 +98,40 @@ module Orch
       end
     end
 
+    option :deploy_kind, :default => 'all',
+           :desc => 'deletes only the given application kind: chronos, marathon, all'
+    option :deploy_var, :default => 'all',
+           :desc => 'DEPLOY_VAR=VALUE deletes only if a deploy_var matches the given value'
+    option :chronos_url,
+           :desc => 'url to chronos master'
+    option :marathon_url,
+           :desc => 'url to marathon master'
+    option :subst,
+           :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
+    desc 'delete PATH', 'Deletes config from mesos frameworks.'
+    def delete(file_name)
+      parser = Orch::Parse.new(file_name, options)
+      result = parser.parse(false)
+
+      if result.length == 0
+        puts "nothing found to delete"
+      end
+
+      deploy = Orch::Deploy.new(options)
+      result.each do |app|
+        if !app[:deploy]
+          puts "skipping app: #{app[:name]}"
+          next
+        end
+        puts "deleting #{app[:name]} from #{app[:type]}"
+        if app[:type] == "Chronos"
+          deploy.delete_chronos(app[:name])
+        end
+        if app[:type] == "Marathon"
+          deploy.delete_marathon(app[:name])
+        end
+      end
+    end
+
   end
 end

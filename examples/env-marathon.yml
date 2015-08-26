@@ -1,0 +1,42 @@
+default_job: &DEFAULT_JOB
+  kind: Marathon
+  DEPLOY_ENV: dev
+  marathon_spec: &DEFAULT_SPEC
+    id: "test-web-{{DEPLOY_ENV}}"
+    cpus: 0.1
+    mem: 300
+    instances: 3
+    env: 
+      FOO: "bar"
+    container: &DEFAULT_CONTAINER
+      type: "DOCKER"
+      docker: &DEFAULT_DOCKER
+        image: "nginx"
+        network: "BRIDGE"
+        portMappings: 
+          - 
+            containerPort: 80
+            hostPort: 0
+            protocol: "tcp"
+        forcePullImage: false
+
+version: alpha1
+deploy_vars:
+  DEPLOY_ENV:
+    - dev
+    - test
+    - prod
+applications:
+  - <<: *DEFAULT_JOB
+    DEPLOY_ENV: dev
+    marathon_spec:
+      <<: *DEFAULT_SPEC
+      container:
+        <<: *DEFAULT_CONTAINER
+        docker:
+          <<: *DEFAULT_DOCKER
+          forcePullImage: true
+  - <<: *DEFAULT_JOB
+    DEPLOY_ENV: test
+  - <<: *DEFAULT_JOB
+    DEPLOY_ENV: prod
