@@ -1,5 +1,5 @@
 version: alpha1
-environment_vars:
+deploy_vars:
   DEPLOY_ENV:
     - dev
     - test

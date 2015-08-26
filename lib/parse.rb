@@ -42,6 +42,11 @@ module Orch
       # Check for vault vars
       env_var_values = parse_vault_vars(@spec)
 
+      # Check for env values at spec level
+      if ! spec.env.nil?
+        env_var_values = env_var_values.merge(spec.env)
+      end
+
       if spec.applications.nil?
         puts "required section applications: must have at least one application defined"
         exit 1
@@ -60,21 +65,26 @@ module Orch
           exit 1
         end
 
-        # Generate any environment variables that need to be merged in
-        spec_env_vars = parse_env_vars(app)
-        env_var_values = env_var_values.merge(spec_env_vars)
+        # Generate any deploy variables that need to be merged in
+        deploy_vars = parse_deploy_vars(app)
+        app_var_values = env_var_values.merge(deploy_vars)
+
+        # Check for env values at app level
+        if ! app.env.nil?
+          app_var_values = app_var_values.merge(app.env)
+        end
 
         if (app.kind == "Chronos")
-          chronos_spec = parse_chronos(app, env_var_values)
+          chronos_spec = parse_chronos(app, app_var_values)
 
-          result = {:name => chronos_spec["name"], :type => app.kind, :deploy => should_deploy?(app), :env_vars => env_var_values, :json => chronos_spec}
+          result = {:name => chronos_spec["name"], :type => app.kind, :deploy => should_deploy?(app), :env_vars => deploy_vars, :json => chronos_spec}
           results << result
         end
 
         if (app.kind == "Marathon")
-          marathon_spec = parse_marathon(app, env_var_values)
+          marathon_spec = parse_marathon(app, app_var_values)
 
-          result = {:name => marathon_spec["id"], :type => app.kind, :deploy => should_deploy?(app), :env_vars => env_var_values, :json => marathon_spec}
+          result = {:name => marathon_spec["id"], :type => app.kind, :deploy => should_deploy?(app), :env_vars => deploy_vars, :json => marathon_spec}
           results << result
         end
       end
@@ -82,17 +92,17 @@ module Orch
       return results
     end
 
-    def parse_env_vars(app)
+    def parse_deploy_vars(app)
       result = {}
-      if (! @spec.environment_vars.nil?)
-        @spec.environment_vars.each do |key, value|
+      if (! @spec.deploy_vars.nil?)
+        @spec.deploy_vars.each do |key, value|
           if app[key].nil?
             puts "environments_var #{key} specified - but not included in app"
             # TODO: would be nice to put the app name...
             exit 1
           end
-          if ! @spec.environment_vars[key].include? app[key]
-            puts "#{key} value \"#{app[key]}\" not in #{@spec.environment_vars[key].to_s}"
+          if ! @spec.deploy_vars[key].include? app[key]
+            puts "#{key} value \"#{app[key]}\" not in #{@spec.deploy_vars[key].to_s}"
             exit 1
           end
           result[key] = app[key]
@@ -161,13 +171,13 @@ module Orch
       if @options[:deploy_env] != 'all'
         @options[:deploy_env].split(",").each do |x|
           pair = x.split("=")
-          envVar = pair[0]
-          envVal = pair[1]
-          if app[envVar].nil?
-            puts "environment var of '#{envVar}' not found in app"
+          deployVar = pair[0]
+          deployVal = pair[1]
+          if app[deployVar].nil?
+            puts "environment var of '#{deployVar}' not found in app"
             exit 1
           end
-          if app[envVar] != envVal
+          if app[deployVar] != deployVal
             result = false
           end
         end
@@ -179,9 +189,9 @@ module Orch
     def do_subst(spec, app)
       spec_str = spec.to_json.to_s
 
-      # Subst any of the environment_vars values
-      if (! @spec.environment_vars.nil?)
-        @spec.environment_vars.each do |key, value|
+      # Subst any of the deploy_vars values
+      if (! @spec.deploy_vars.nil?)
+        @spec.deploy_vars.each do |key, value|
           spec_str = spec_str.gsub(/{{#{key}}}/, app[key])
         end
       end

@@ -1,9 +1,8 @@
 
 default_job: &DEFAULT_JOB
   kind: Chronos
-  environment: override me
   chronos_spec: &DEFAULT_SPEC
-    name: "ray-test-{{DEPLOY_ENV}}"
+    name: "ray-test-{{DEPLOY_ENV}}-{{COLO}}"
     schedule: "R/2015-01-25T21:00/PT24H"
     scheduleTimeZone: "PST"
     owner: "rjohnson@yp.com"
@@ -11,6 +10,7 @@ default_job: &DEFAULT_JOB
       type: "DOCKER"
       image: "busybox"
       network: "BRIDGE"
+      forcePullImage: false
     cpus: "0.5"
     mem: "512"
     uris: []
@@ -18,11 +18,12 @@ default_job: &DEFAULT_JOB
       - 
         name: "LOG_LOCATION"
         value: "/var/{{DEPLOY_ENV}}"
-    forcePullImage: false
     command: "echo \"log here: $LOG_LOCATION\"; echo \"ENV: $DEPLOY_ENV\";sleep 10; echo bye"
 
 version: alpha1
-environment_vars:
+env:
+  CAT: kitty
+deploy_vars:
   DEPLOY_ENV:
     - dev
     - test
@@ -34,10 +35,14 @@ applications:
   - <<: *DEFAULT_JOB
     DEPLOY_ENV: dev
     COLO: east
+    env:
+      DOG: doggy
     chronos_spec:
       <<: *DEFAULT_SPEC
       schedule: "R/2015-08-01T21:00/PT24H"
-      forcePullImage: true
+      container:
+        <<: *DEFAULT_CONTAINER
+        forcePullImage: true
   - <<: *DEFAULT_JOB
     DEPLOY_ENV: test
     COLO: east

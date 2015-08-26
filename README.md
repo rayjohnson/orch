@@ -44,11 +44,11 @@ So far all we have is a different way to specify a job.  The real power of orch 
 
 ### Environment vars
 
-The **environment_vars:** field allows you to define some values that can be used to drive deployment of the same config for multiple uses.  Often it is useful to have *dev*, *test* & *prod* environments for our application.  Generally we want to use the same specification for all environments but we need a way to differentiate them and allow the app at run time to know what environment it is running in.
+The **deploy_vars:** field allows you to define some values that can be used to drive deployment of the same config for multiple uses.  Often it is useful to have *dev*, *test* & *prod* environments for our application.  Generally we want to use the same specification for all environments but we need a way to differentiate them and allow the app at run time to know what environment it is running in.
 
 Let's start with an example:
 ```
-environment_vars:
+deploy_vars:
   DEPLOY_ENV:
     - dev
     - test
@@ -59,7 +59,7 @@ This example will define an environment variable named **DEPLOY_ENV**.  (You can
 You then would need to specify that variable in your application sections like this:
 ```
 version: alpha1
-environment_vars:
+deploy_vars:
   DEPLOY_ENV:
     - dev
     - test
@@ -77,9 +77,46 @@ applications:
       ...
 ```
 
-When orch runs it will insert the environment variable into the *env* or *environmentVariables* sections of your spec.  However, you can also use the **--deploy-env** to tell orch to only deploy a paticular environment.  You can also use the substitution feature to use the value of your environment varaible in other parts of the config like name.  *(e.g. name: "myapp-{{DEPLOY_ENV}}")*
+When orch runs it will insert the environment variable into the *env* or *environmentVariables* sections of your spec.  However, you can also use the **--deploy-env** command line option to tell orch to only deploy a paticular environment.  You can also use the substitution feature to use the value of your environment varaible in other parts of the config like name.  *(e.g. `name: "myapp-{{DEPLOY_ENV}}"` would substitute to `name: "myapp-dev"` for the dev environment)*
 
-TODO: finish this section
+### Alternative way to set environment variables
+
+Chronos and Marathon use different syntx to specify environment variables.  Also, you may want to specify certain variables consistently across several applications in your orch spec.  The **env:** field provides a way to do that with a nice clean syntax.
+
+
+The env field could be used at the top level of the spec to be used across all applications in the spec:
+```
+version: alpha1
+env:
+  GOOGLE_URL: http://www.google.com
+  YP_URL: http://www.yp.com
+  applications:
+    ...
+```
+
+Or you can also specify it at the application level as an alternative syntax to specifying it in the *marathon_spec:* or *chronos_spec:* sections - like this:
+```
+version: alpha1
+env:
+  GOOGLE_URL: http://www.google.com
+  YP_URL: http://www.yp.com
+  applications:
+    - kind: Marathon
+      env:
+        GOOGLE_URL: http://www.google.com
+        YP_URL: http://www.yp.com        
+      marathon_spec:
+        ...
+```
+
+### Yaml anchors and aliases
+
+The nice thing about using Yaml as the spec format is the ability to use Yaml's anchors (&) and alias (*) syntax.  This allows you to specify sections of your configuration that can be reused across multiple jobs.  Typically if you have a job for multiple deployment environments you what them all to have the same spec - except perhaps override one or two things.  (Like an envionment value or the docker image.)
+
+We will refer you to other documentation on the internet on how to use Yaml anchors and aliases.  However, you can take a look at a couple of the [provided examples](examples/Examples.md) to see how you might use Yaml to its fullest.
+
+### TODO: section on substitution
+### TODO: section on vault
 
 ## Configuration Options
 

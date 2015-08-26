@@ -29,8 +29,8 @@ module Orch
 
     option :deploy_kind, :default => 'all',
            :desc => 'deploys only the given application kind: chronos, marathon, all'
-    option :deploy_env, :default => 'all',
-           :desc => 'ENV_VAR=VALUE deploys only if an environment_var matches the given value'
+    option :deploy_var, :default => 'all',
+           :desc => 'DEPLOY_VAR=VALUE deploys only if a deploy_var matches the given value'
     option :subst,
            :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
     option :show_json, :default => false,
@@ -64,8 +64,8 @@ module Orch
 
     option :deploy_kind, :default => 'all',
            :desc => 'deploys only the given application kind: chronos, marathon, all'
-    option :deploy_env, :default => 'all',
-           :desc => 'ENV_VAR=VALUE deploys only if an environment_var matches the given value'
+    option :deploy_var, :default => 'all',
+           :desc => 'DEPLOY_VAR=VALUE deploys only if a deploy_var matches the given value'
     option :chronos_url,
            :desc => 'url to chronos master'
     option :marathon_url,
