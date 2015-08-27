@@ -4,7 +4,8 @@ require 'json'
 require 'thor'
 require "yaml"
 require "parse"
-require "deploy"
+require "chronos"
+require "marathon"
 
 module Orch
   class Application < Thor
@@ -42,7 +43,9 @@ module Orch
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(true)
       puts "Number of configs found: #{result.length}"
-      deploy = Orch::Deploy.new(options)
+
+      marathon = Orch::Marathon.new(options)
+      chronos = Orch::Chronos.new(options)
       result.each do |app|
         printf "Name: %s, Type: %s, Deploy?: %s", app[:name], app[:type], app[:deploy]
         app[:env_vars].each do |key, value|
@@ -54,10 +57,10 @@ module Orch
           puts "JSON: #{pretty}"
         end
         if (app[:type] == "Chronos") && (options[:server_verify] == true)
-          deploy.verify_chronos(app[:json].to_json)
+          chronos.verify(app[:json].to_json)
         end
         if (app[:type] == "Marathon") && (options[:server_verify] == true)
-          deploy.verify_marathon(app[:json].to_json)
+          marathon.verify(app[:json].to_json)
         end
       end
     end
@@ -81,7 +84,8 @@ module Orch
         puts "nothing found to deploy"
       end
 
-      deploy = Orch::Deploy.new(options)
+      marathon = Orch::Marathon.new(options)
+      chronos = Orch::Chronos.new(options)
       result.each do |app|
         if !app[:deploy]
           puts "skipping app: #{app[:name]}"
@@ -90,10 +94,10 @@ module Orch
         puts "deploying #{app[:name]} to #{app[:type]}"
         #puts "#{app[:json]}"  - should I support show_json here as well?
         if app[:type] == "Chronos"
-          deploy.deploy_chronos(app[:json].to_json)
+          chronos.deploy(app[:json].to_json)
         end
         if app[:type] == "Marathon"
-          deploy.deploy_marathon(app[:name], app[:json].to_json)
+          marathon.deploy(app[:name], app[:json].to_json)
         end
       end
     end
@@ -117,7 +121,8 @@ module Orch
         puts "nothing found to delete"
       end
 
-      deploy = Orch::Deploy.new(options)
+      marathon = Orch::Marathon.new(options)
+      chronos = Orch::Chronos.new(options)
       result.each do |app|
         if !app[:deploy]
           puts "skipping app: #{app[:name]}"
@@ -125,10 +130,10 @@ module Orch
         end
         puts "deleting #{app[:name]} from #{app[:type]}"
         if app[:type] == "Chronos"
-          deploy.delete_chronos(app[:name])
+          chronos.delete(app[:name])
         end
         if app[:type] == "Marathon"
-          deploy.delete_marathon(app[:name])
+          marathon.delete(app[:name])
         end
       end
     end
@@ -150,7 +155,7 @@ module Orch
         puts "nothing found to restart"
       end
 
-      deploy = Orch::Deploy.new(options)
+      marathon = Orch::Marathon.new(options)
       result.each do |app|
         if !app[:deploy] || (app[:type] == "Chronos")
           puts "skipping app: #{app[:name]}"
@@ -158,7 +163,7 @@ module Orch
         end
         puts "restarting #{app[:name]} on #{app[:type]}"
         if app[:type] == "Marathon"
-          deploy.restart_marathon(app[:name])
+          marathon.restart(app[:name])
         end
       end
     end
