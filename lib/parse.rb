@@ -161,7 +161,7 @@ module Orch
       # Augment any spec environment variables with meta values - but don't overwite
       marathon_spec.env = {} unless marathon_spec.env
       env_var_values.each do |key, value|
-        marathon_spec.env[key] = value unless marathon_spec.env[key] 
+        marathon_spec.env[key] = value.to_s unless marathon_spec.env[key] 
       end
 
       spec_str = do_subst(marathon_spec, app)

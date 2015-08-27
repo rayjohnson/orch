@@ -99,22 +99,22 @@ module Orch
       return response
     end
 
-    def deploy_marathon(json_payload)
+    def deploy_marathon(app_id, json_payload)
       uri = URI(@config.marathon_url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
-      puts uri
 
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.put("/v2/apps/#{json_payload["id"]}", json_payload, json_headers)
+      response = http.put("/v2/apps/#{app_id}", json_payload, json_headers)
 
-      puts "Response #{response.code} #{response.message}: #{response.body}"
-
-      if response.code == 204.to_s
-        puts "success"
+      # TODO: should we do anyting with version or deploymentId that gets returned?
+      if response.code == 201.to_s
+        puts "successfully created marathon job: #{app_id}"
+      elsif response.code == 200.to_s
+        puts "successfully updated marathon job: #{app_id}"
+      else
+        puts "Response #{response.code} #{response.message}: #{response.body}"
       end
-
-      # TODO: handle error codes
 
       return response
     end
@@ -171,6 +171,23 @@ module Orch
       return response
     end
 
+    def restart_marathon(app_id)
+      # POST /v2/apps/{appId}/restart: Rolling restart of all tasks of the given app
+      uri = URI(@config.marathon_url)
+      json_headers = {"Content-Type" => "application/json",
+                "Accept" => "application/json"}
+
+      http = Net::HTTP.new(uri.host, uri.port)
+      response = http.post("/v2/apps/#{app_id}/restart", {}.to_json, json_headers)
+
+      if response.code == 200.to_s
+        puts "success"
+      else
+        puts "Response #{response.code} #{response.message}: #{response.body}"
+      end
+
+      return response
+    end
 
     def find_diffs(spec, job)
       foundDiff = false

@@ -93,7 +93,7 @@ module Orch
           deploy.deploy_chronos(app[:json].to_json)
         end
         if app[:type] == "Marathon"
-          deploy.deploy_marathon(app[:json].to_json)
+          deploy.deploy_marathon(app[:name], app[:json].to_json)
         end
       end
     end
@@ -133,5 +133,34 @@ module Orch
       end
     end
 
+    option :deploy_kind, :default => 'all',
+           :desc => 'deletes only the given application kind: chronos, marathon, all'
+    option :deploy_var, :default => 'all',
+           :desc => 'DEPLOY_VAR=VALUE deletes only if a deploy_var matches the given value'
+    option :marathon_url,
+           :desc => 'url to marathon master'
+    option :subst,
+           :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
+    desc 'restart PATH', 'Restarts specified application(s) on server'
+    def restart(file_name)
+      parser = Orch::Parse.new(file_name, options)
+      result = parser.parse(false)
+
+      if result.length == 0
+        puts "nothing found to restart"
+      end
+
+      deploy = Orch::Deploy.new(options)
+      result.each do |app|
+        if !app[:deploy] || (app[:type] == "Chronos")
+          puts "skipping app: #{app[:name]}"
+          next
+        end
+        puts "restarting #{app[:name]} on #{app[:type]}"
+        if app[:type] == "Marathon"
+          deploy.restart_marathon(app[:name])
+        end
+      end
+    end
   end
 end
