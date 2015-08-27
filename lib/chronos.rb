@@ -78,6 +78,7 @@ module Orch
 
       if response.code != 200.to_s
         puts "Response #{response.code} #{response.message}: #{response.body}"
+        foundDiffs = true 
       end
 
       array = JSON.parse(response.body).map { |hash| Hashie::Mash.new(hash) }
@@ -93,11 +94,12 @@ module Orch
       
       if !jobFound
         puts "job \"#{spec.name}\" not currently deployed"
+        foundDiffs = true 
       end
 
       # TODO: handle error codes better?
 
-      return response
+      return foundDiffs
     end
 
     def find_diffs(spec, job)

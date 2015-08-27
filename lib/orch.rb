@@ -56,11 +56,15 @@ module Orch
           pretty = JSON.pretty_generate(app[:json])
           puts "JSON: #{pretty}"
         end
+        foundDiffs = false
         if (app[:type] == "Chronos") && (options[:server_verify] == true)
-          chronos.verify(app[:json].to_json)
+          foundDiffs = chronos.verify(app[:json].to_json)
         end
         if (app[:type] == "Marathon") && (options[:server_verify] == true)
-          marathon.verify(app[:json].to_json)
+          foundDiffs = marathon.verify(app[:json].to_json)
+        end
+        if (!foundDiffs) && (options[:server_verify] == true)
+          puts "No differences with server found"
         end
       end
     end

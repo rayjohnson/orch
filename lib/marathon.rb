@@ -42,18 +42,15 @@ module Orch
       uri = URI(@config.marathon_url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
-      puts uri
 
       http = Net::HTTP.new(uri.host, uri.port)
       response = http.delete("/v2/apps/#{id}", json_headers)
 
-      puts "Response #{response.code} #{response.message}: #{response.body}"
-
       if response.code == 200.to_s
-        puts "success"
+        puts "successfully deleted #{id}"
+      else
+        puts "Response #{response.code} #{response.message}: #{response.body}"
       end
-
-      # TODO: handle error codes
 
       return response
     end
@@ -77,17 +74,20 @@ module Orch
 
       if response.code == 404.to_s
         puts "job: #{spec.id} - is not deployed"
-        return
+        foundDiffs = true
       end
 
       if response.code == 200.to_s
         job = Hashie::Mash.new(JSON.parse(response.body))
         foundDiffs = find_diffs(spec, job.app)
+      else
+        puts "Response #{response.code} #{response.message}: #{response.body}"
+        foundDiffs = true 
       end
 
       # TODO: handle error codes
 
-      return response
+      return foundDiffs
     end
 
     def restart(app_id)
