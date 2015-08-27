@@ -20,8 +20,6 @@ default_job: &DEFAULT_JOB
     command: "echo \"log here: $LOG_LOCATION\"; echo \"ENV: $DEPLOY_ENV\";sleep 10; echo bye"
 
 version: alpha1
-env:
-  CAT: kitty
 deploy_vars:
   DEPLOY_ENV:
     - dev
@@ -34,8 +32,6 @@ applications:
   - <<: *DEFAULT_JOB
     DEPLOY_ENV: dev
     COLO: east
-    env:
-      DOG: doggy
     chronos_spec:
       <<: *DEFAULT_SPEC
       schedule: "R/2015-08-01T21:00/PT24H"

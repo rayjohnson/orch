@@ -109,6 +109,7 @@ env:
         ...
 ```
 
+Lower level definitions of an env var will supeceed higher level version.  That is if you specify an env value in the *marathon_spec* or *chronos_spec* level it will override anything set at the *app* or *orch* level.
 ### Yaml anchors and aliases
 
 The nice thing about using Yaml as the spec format is the ability to use Yaml's anchors (&) and alias (*) syntax.  This allows you to specify sections of your configuration that can be reused across multiple jobs.  Typically if you have a job for multiple deployment environments you what them all to have the same spec - except perhaps override one or two things.  (Like an envionment value or the docker image.)

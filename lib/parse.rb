@@ -131,11 +131,15 @@ module Orch
       end
       chronos_spec = app.chronos_spec
 
-      # Augment any spec environment variables with meta values
-      if chronos_spec.environmentVariables.nil?
-        chronos_spec.environmentVariables = []
+      # Override out high-level env vars with any chronos_spec level vars
+      env_vars = env_var_values
+      (chronos_spec.environmentVariables || []).each do |x|
+        env_vars[x["name"]] = x["value"]
       end
-      env_var_values.each do |key, value|
+
+      # Rewrite the environmentVariables from the hash
+      chronos_spec.environmentVariables = []
+      env_vars.each do |key, value|
         pair = {"name" => key, "value" => value}
         chronos_spec.environmentVariables << pair        
       end
@@ -154,9 +158,10 @@ module Orch
       end
       marathon_spec = app.marathon_spec
 
-      # Augment any spec environment variables with meta values
+      # Augment any spec environment variables with meta values - but don't overwite
+      marathon_spec.env = {} unless marathon_spec.env
       env_var_values.each do |key, value|
-        marathon_spec.env[key] = value     
+        marathon_spec.env[key] = value unless marathon_spec.env[key] 
       end
 
       spec_str = do_subst(marathon_spec, app)

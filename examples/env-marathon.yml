@@ -6,8 +6,6 @@ default_job: &DEFAULT_JOB
     cpus: 0.1
     mem: 300
     instances: 3
-    env: 
-      FOO: "bar"
     container: &DEFAULT_CONTAINER
       type: "DOCKER"
       docker: &DEFAULT_DOCKER
@@ -26,6 +24,8 @@ deploy_vars:
     - dev
     - test
     - prod
+env:
+  DEBUG_FLAG: true
 applications:
   - <<: *DEFAULT_JOB
     DEPLOY_ENV: dev
@@ -40,3 +40,5 @@ applications:
     DEPLOY_ENV: test
   - <<: *DEFAULT_JOB
     DEPLOY_ENV: prod
+    env:
+      DEBUG_FLAG: false
