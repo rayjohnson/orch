@@ -19,5 +19,4 @@ applications:
               containerPort: 80
               hostPort: 0
               protocol: "tcp"
-          forcePullImage: true
 

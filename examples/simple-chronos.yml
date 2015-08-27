@@ -2,8 +2,8 @@ version: alpha1
 applications:
   - kind: Chronos
     chronos_spec:
-      name: "ray-test"
-      schedule: "R/2015-01-25T21:00/PT24H"
+      name: "orch-test-schedule"
+      schedule: "R/2015-01-25T21:00/PT03H"
       scheduleTimeZone: "PST"
       owner: "rjohnson@yp.com"
       container: 
@@ -15,3 +15,19 @@ applications:
       uris: []
       forcePullImage: true
       command: "echo hello; sleep 10; echo bye"
+  - kind: Chronos
+    chronos_spec:
+      name: "orch-test-dependant-schedule"
+      parents:
+        - orch-test-schedule
+      scheduleTimeZone: "PST"
+      owner: "rjohnson@yp.com"
+      container: 
+        type: "DOCKER"
+        image: "busybox"
+        network: "BRIDGE"
+      cpus: "0.5"
+      mem: "512"
+      uris: []
+      forcePullImage: true
+      command: "echo run-dependant-job; sleep 10; echo bye"

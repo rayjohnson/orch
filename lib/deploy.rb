@@ -22,9 +22,16 @@ module Orch
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
 
-      # curl -L -H 'Content-Type: application/json' -X POST -d @$schedule_file $CHRONOS_URL/scheduler/iso8601
+      path = nil
+      path = "/scheduler/iso8601" unless json_payload["schedule"].nil?
+      path = "/scheduler/dependency" unless json_payload["parents"].nil?
+      if path.nil?
+        puts "neither schedule nor parents fields defined for Chronos job"
+        exit 1
+      end
+
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.post("/scheduler/iso8601", json_payload, json_headers)
+      response = http.post(path, json_payload, json_headers)
 
       if response.code != 204.to_s
         puts "Response #{response.code} #{response.message}: #{response.body}"
