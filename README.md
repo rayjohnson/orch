@@ -116,6 +116,23 @@ The nice thing about using Yaml as the spec format is the ability to use Yaml's 
 
 We will refer you to other documentation on the internet on how to use Yaml anchors and aliases.  However, you can take a look at a couple of the [provided examples](examples/Examples.md) to see how you might use Yaml to its fullest.
 
+### Bamboo
+
+[Bamboo](https://github.com/QubitProducts/bamboo) is a tool that creates an HAProxy for providing an easier way to get to a farm of web servers hosted by Marathon.  You define the Marathon id of the application you want to load balance and an acl to tell HAProxy what url to direct to your marathon application.
+
+Orch provides a way to also configure your Bamboo server from your orch config.  Here is an example:
+```
+version: alpha1
+applications:
+  - kind: Marathon
+    marathon_spec:
+      ...
+    bamboo_spec:
+      acl: "hdr(host) -i test-web.int.yp.com"
+```
+
+An additional *bamboo_spec:* field is added to the Marathon application at the same level as the *marathon_spec:* field.  The *bamboo_spec:* field contains one field called *acl:*.  The simply has a acl rule for HAProxy.  See Bamboo documentation for more details.
+
 ### TODO: section on substitution
 ### TODO: section on vault
 
