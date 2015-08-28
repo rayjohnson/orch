@@ -6,6 +6,7 @@ require "yaml"
 require "parse"
 require "chronos"
 require "marathon"
+require "bamboo"
 
 module Orch
   class Application < Thor
@@ -22,10 +23,12 @@ module Orch
         end
       end
       say("Enter values to construct a ~/.orch/config.yaml file")
-      marathon_url = ask("Marathon URL: ")
-      chronos_url = ask("Chronos URL: ")
+      settings = {}
+      settings["marathon_url"] = ask("Marathon URL: ")
+      settings["chronos_url"] = ask("Chronos URL: ")
+      settings["bamboo_url"] = ask("Bamboo URL: ")
 
-      config.setup_config(marathon_url, chronos_url)
+      config.setup_config(settings)
     end
 
     option :deploy_kind, :default => 'all',
@@ -46,6 +49,7 @@ module Orch
 
       marathon = Orch::Marathon.new(options)
       chronos = Orch::Chronos.new(options)
+      bamboo = Orch::Bamboo.new(options)
       result.each do |app|
         printf "Name: %s, Type: %s, Deploy?: %s", app[:name], app[:type], app[:deploy]
         app[:env_vars].each do |key, value|
@@ -62,6 +66,10 @@ module Orch
         end
         if (app[:type] == "Marathon") && (options[:server_verify] == true)
           foundDiffs = marathon.verify(app[:json].to_json)
+          if app[:bamboo_spec]
+            bambooDiffs = bamboo.verify(app[:name], app[:bamboo_spec])
+            foundDiffs = foundDiffs || bambooDiffs
+          end
         end
         if (!foundDiffs) && (options[:server_verify] == true)
           puts "No differences with server found"
@@ -77,6 +85,8 @@ module Orch
            :desc => 'url to chronos master'
     option :marathon_url,
            :desc => 'url to marathon master'
+    option :bamboo_url,
+           :desc => 'url to bamboo server'
     option :subst,
            :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
     desc 'deploy PATH', 'Deploys config to mesos frameworks.'
@@ -90,6 +100,7 @@ module Orch
 
       marathon = Orch::Marathon.new(options)
       chronos = Orch::Chronos.new(options)
+      bamboo = Orch::Bamboo.new(options)
       result.each do |app|
         if !app[:deploy]
           puts "skipping app: #{app[:name]}"
@@ -102,6 +113,9 @@ module Orch
         end
         if app[:type] == "Marathon"
           marathon.deploy(app[:name], app[:json].to_json)
+          if app[:bamboo_spec]
+            bamboo.deploy(app[:name], app[:bamboo_spec])
+          end
         end
       end
     end
@@ -114,6 +128,8 @@ module Orch
            :desc => 'url to chronos master'
     option :marathon_url,
            :desc => 'url to marathon master'
+    option :bamboo_url,
+           :desc => 'url to bamboo server'
     option :subst,
            :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
     desc 'delete PATH', 'Deletes config from mesos frameworks.'
@@ -127,6 +143,8 @@ module Orch
 
       marathon = Orch::Marathon.new(options)
       chronos = Orch::Chronos.new(options)
+      bamboo = Orch::Bamboo.new(options)
+
       result.each do |app|
         if !app[:deploy]
           puts "skipping app: #{app[:name]}"
@@ -138,6 +156,9 @@ module Orch
         end
         if app[:type] == "Marathon"
           marathon.delete(app[:name])
+          if app[:bamboo_spec]
+            bamboo.delete(app[:name])
+          end
         end
       end
     end

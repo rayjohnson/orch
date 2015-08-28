@@ -9,14 +9,13 @@ module Orch
         puts "file does not exist: #{path}"
         exit 1
       end
-      # TODO: try resecue for any syntax issues in yaml file
+
       begin
         yaml = ::YAML.load_file(path)
       rescue Psych::SyntaxError => e
         puts "error parsing yaml file #{e}"
         exit 1
       end
-      #puts yaml.to_json
 
       @options = options
 
@@ -85,8 +84,15 @@ module Orch
           marathon_spec = parse_marathon(app, app_var_values)
 
           result = {:name => marathon_spec["id"], :type => app.kind, :deploy => should_deploy?(app), :env_vars => deploy_vars, :json => marathon_spec}
+
+          if app.bamboo_spec
+            bamboo_spec = parse_bamboo(app, app_var_values)
+            result[:bamboo_spec] = bamboo_spec
+          end
+
           results << result
         end
+
       end
 
       return results
@@ -164,18 +170,34 @@ module Orch
         marathon_spec.env[key] = value.to_s unless marathon_spec.env[key] 
       end
 
+      if marathon_spec.id
+        marathon_spec.id = (marathon_spec.id[0] == '/') ? marathon_spec.id : ("/" + marathon_spec.id)
+      else
+        puts "id: is a required field for a marathon spec"
+        exit 1
+      end
+
       spec_str = do_subst(marathon_spec, app)
       marathon_spec = JSON.parse(spec_str)
 
       return marathon_spec
     end
 
+    def parse_bamboo(app, env_var_values)
+      # Do any substs
+      spec_str = do_subst(app.bamboo_spec, app)
+      bamboo_spec = JSON.parse(spec_str)
+
+      if bamboo_spec['acl'].nil?
+        puts "required field 'acl:' missing from bamboo_spec"
+      end
+
+      return bamboo_spec
+    end
+
     def should_deploy?(app)
       result = true
-      if (app.kind == "Marathon") && @options[:deploy_kind] == 'chronos'
-        result = false
-      end
-      if (app.kind == "Chronos") && @options[:deploy_kind] == 'marathon'
+      if @options[:deploy_kind] != 'all' && app.kind != @options[:deploy_kind]
         result = false
       end
 

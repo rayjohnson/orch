@@ -32,6 +32,14 @@ module Orch
       end
     end
 
+    def check_for_bamboo_url
+      if (!  @options.has_key?("bamboo_url")) && (@APP_CONFIG.nil? || @APP_CONFIG["bamboo_url"].nil?)
+        return false
+      else
+        return true
+      end
+    end
+
     def chronos_url
       if @options.has_key?("chronos_url")
         # If passed in on command line override what is in config file
@@ -62,13 +70,32 @@ module Orch
       return @APP_CONFIG["marathon_url"]
     end
 
-    def setup_config(marathon_url, chronos_url)
+    def bamboo_url
+      if @options.has_key?("bamboo_url")
+        # If passed in on command line override what is in config file
+        url = @options["bamboo_url"]
+        return url
+      end
+
+      if @APP_CONFIG.nil? || @APP_CONFIG["bamboo_url"].nil?
+        puts "bamboo_url not specified, use --bamboo_url or set in ~/.orch/config.yml"
+        exit 1
+      end
+
+      return @APP_CONFIG["bamboo_url"]
+    end
+
+    def setup_config(settings)
 
       if @APP_CONFIG.nil?
         @APP_CONFIG = {}
       end
-      @APP_CONFIG['marathon_url'] = marathon_url
-      @APP_CONFIG['chronos_url'] = chronos_url
+
+      settings.each do |key, value|
+        if settings[key] != ""
+          @APP_CONFIG[key] = value
+        end
+      end
 
       if ! File.directory?("#{Dir.home}/.orch")
         Dir.mkdir("#{Dir.home}/.orch")

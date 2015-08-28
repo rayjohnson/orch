@@ -48,6 +48,8 @@ module Orch
 
       if response.code == 200.to_s
         puts "successfully deleted #{id}"
+      elsif response.code == 404.to_s
+        puts "job: #{id} - does not exist to delete"
       else
         puts "Response #{response.code} #{response.message}: #{response.body}"
       end
@@ -70,22 +72,16 @@ module Orch
       http = Net::HTTP.new(uri.host, uri.port)
       response = http.get("/v2/apps/#{spec.id}", json_headers)
 
-      # puts "Response #{response.code} #{response.message}: #{response.body}"
-
-      if response.code == 404.to_s
-        puts "job: #{spec.id} - is not deployed"
-        foundDiffs = true
-      end
-
       if response.code == 200.to_s
         job = Hashie::Mash.new(JSON.parse(response.body))
         foundDiffs = find_diffs(spec, job.app)
+      elsif response.code == 404.to_s
+        puts "job: #{spec.id} - not defined in Marathon"
+        foundDiffs = true 
       else
         puts "Response #{response.code} #{response.message}: #{response.body}"
         foundDiffs = true 
       end
-
-      # TODO: handle error codes
 
       return foundDiffs
     end
@@ -139,14 +135,6 @@ module Orch
         if spec[key].to_s.numeric?
           specVal = Float(spec[key])
           jobVal = Float(job[key])
-        else
-          specVal = spec[key]
-          jobVal = job[key]
-        end
-        # Marathon changes the spec in some cases - handle them specially
-        if key == "id"
-          # At a basic level marathon adds a / to the front of the id we pass in...
-          jobVal.sub!("/", "")
         end
         if specVal != jobVal
           printf "difference for field: #{key}\n"
