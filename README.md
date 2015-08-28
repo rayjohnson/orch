@@ -42,7 +42,7 @@ Likewise, the values of **marathon_spec:** should simply be the yaml equivelent 
 
 So far all we have is a different way to specify a job.  The real power of orch will come from using meta data to act on these configs in more interesting ways...
 
-### Environment vars
+### Deployment vars
 
 The **deploy_vars:** field allows you to define some values that can be used to drive deployment of the same config for multiple uses.  Often it is useful to have *dev*, *test* & *prod* environments for our application.  Generally we want to use the same specification for all environments but we need a way to differentiate them and allow the app at run time to know what environment it is running in.
 
@@ -116,6 +116,17 @@ The nice thing about using Yaml as the spec format is the ability to use Yaml's 
 
 We will refer you to other documentation on the internet on how to use Yaml anchors and aliases.  However, you can take a look at a couple of the [provided examples](examples/Examples.md) to see how you might use Yaml to its fullest.
 
+### Substition
+
+A primary use case of **orch** is to use the tool from within a Makefile.  You may want to subsitite parts of you configuration from vairables in your Makefile.  In the *Deployment vars* section we showed you how you can use deployment vars as substitution values in other parts of the configuration.
+
+**Orch** also provides the *--subst* option to provide a way to pass additional substitution vars when running your configuration.  A common use case might be to pass in the tag for a Docker image that is managed by your Makefile.  Here is an example:
+```
+todo: provide an example
+```
+
+TODO: finish this section
+
 ### Bamboo
 
 [Bamboo](https://github.com/QubitProducts/bamboo) is a tool that creates an HAProxy for providing an easier way to get to a farm of web servers hosted by Marathon.  You define the Marathon id of the application you want to load balance and an acl to tell HAProxy what url to direct to your marathon application.
@@ -133,7 +144,8 @@ applications:
 
 An additional *bamboo_spec:* field is added to the Marathon application at the same level as the *marathon_spec:* field.  The *bamboo_spec:* field contains one field called *acl:*.  The simply has a acl rule for HAProxy.  See Bamboo documentation for more details.
 
-### TODO: section on substitution
+Note: you will also need to set the **bamboo_url:** feild of your configutation.
+
 ### TODO: section on vault
 
 ## Configuration Options
