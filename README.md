@@ -24,14 +24,14 @@ The orch Yaml format is really a wrapper for multiple Marathon or Chronos job de
 
 The basic orch syntax is as follows:
 ```
-version: alpha1
+version: 1.0
 applications:
   - kind: Chronos
     chronos_spec:
       ...
 ```
 
-The **version:** field must currently always be alpha1.  Eventually, this tool may need to support a revised format and this can be used to support multiple versions.
+The **version:** field must currently always be 1.0.  Eventually, this tool may need to support a revised format and this can be used to support multiple versions.
 
 The **applications:** field contains an array of Chronos or Marathon configurations.  Each array must have a **kind:** field with a value of _Chronos_ or _Marathon_ which simply tells orch what type of config this is.  Depending on the value of **kind:** a field of **chronos_spec:** or **marathon_spec:** is also required.
 
@@ -58,7 +58,7 @@ This example will define an environment variable named **DEPLOY_ENV**.  (You can
 
 You then would need to specify that variable in your application sections like this:
 ```
-version: alpha1
+version: 1.0
 deploy_vars:
   DEPLOY_ENV:
     - dev
@@ -86,7 +86,7 @@ Chronos and Marathon use different syntx to specify environment variables.  Also
 
 The env field could be used at the top level of the spec to be used across all applications in the spec:
 ```
-version: alpha1
+version: 1.0
 env:
   GOOGLE_URL: http://www.google.com
   YP_URL: http://www.yp.com
@@ -96,7 +96,7 @@ env:
 
 Or you can also specify it at the application level as an alternative syntax to specifying it in the *marathon_spec:* or *chronos_spec:* sections - like this:
 ```
-version: alpha1
+version: 1.0
 env:
   GOOGLE_URL: http://www.google.com
   YP_URL: http://www.yp.com
@@ -133,7 +133,7 @@ TODO: finish this section
 
 Orch provides a way to also configure your Bamboo server from your orch config.  Here is an example:
 ```
-version: alpha1
+version: 1.0
 applications:
   - kind: Marathon
     marathon_spec:

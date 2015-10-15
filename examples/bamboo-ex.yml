@@ -20,7 +20,7 @@ default_job: &DEFAULT_JOB
             protocol: "tcp"
         forcePullImage: false
 
-version: alpha1
+version: 1.0
 deploy_vars:
   DEPLOY_ENV:
     - dev

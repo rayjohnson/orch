@@ -1,6 +1,8 @@
 require 'yaml'
 require 'json'
 
+CURRENT_SPEC_VERSION=1.0
+
 module Orch
   class Parse
 
@@ -25,18 +27,8 @@ module Orch
     def parse(dry_run)
       @dry_run = dry_run
       check_option_syntax
+      check_version
       spec = @spec
-
-      # Check for valid version paramter
-      if spec.version.nil?
-        puts "required field version was not found"
-        exit 1
-      end
-      if spec.version != "alpha1"
-        puts "unsupported orch version specified: #{spec.version}"
-        puts "application only understands version alpha1"
-        exit 1
-      end
 
       # Check for vault vars
       env_var_values = parse_vault_vars(@spec)
@@ -238,6 +230,34 @@ module Orch
       end
 
       return spec_str
+    end
+
+    def check_version
+
+      # Check for valid version paramter
+      if @spec.version.nil?
+        puts "required field version was not found"
+        exit 1
+      end
+
+      if @spec.version == "alpha1"
+        # Getting rid of alpha1 syntax and just going to number syntax.  Will support this for a little bit...
+        version = 1.0
+      else
+
+        number = Float( @spec.version ) rescue nil
+        if number.nil? 
+          puts "invalid value \"#{@spec.version}\" for version field of spec"
+          exit 1
+        end
+        version = number
+      end
+
+      if version > CURRENT_SPEC_VERSION
+        STDERR.puts "warning: spec version greater than software supports - may get failure or unexpected behavior"
+      end
+
+      # If we get to point where we need to support older formats - determine that here.
     end
 
     def check_option_syntax

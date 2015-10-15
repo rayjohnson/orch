@@ -19,7 +19,7 @@ default_job: &DEFAULT_JOB
         value: "/var/{{DEPLOY_ENV}}"
     command: "echo \"log here: $LOG_LOCATION\"; echo \"ENV: $DEPLOY_ENV\";sleep 10; echo bye"
 
-version: alpha1
+version: 1.0
 deploy_vars:
   DEPLOY_ENV:
     - dev

@@ -114,9 +114,9 @@ module Orch
         end
         if spec[key].is_a?(Array)
           if spec[key].length != job[key].length
-            printf "difference for field: #{key} - length of array is different\n"
-            printf "    spec:   #{spec[key].to_json}\n"
-            printf "    server: #{job[key].to_json}\n"
+            printf("difference for field: %s - length of array is different\n", key)
+            printf("    spec:   %s\n", spec[key].to_json)
+            printf("    server: %s\n", job[key].to_json)
             foundDiff = true
             next
           end
@@ -140,9 +140,9 @@ module Orch
           if foundDiff == false
             puts "Differences found in job"
           end
-          printf "difference for field: #{key}\n"
-          printf "    spec:   #{specVal}\n"
-          printf "    server: #{jobVal}\n"
+          printf("difference for field: %s\n", key)
+          printf("    spec:   %s\n", specVal)
+          printf("    server: %s\n", jobVal)
           foundDiff = true
         end
       end
