@@ -45,13 +45,19 @@ module Orch
     def verify(file_name)
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(true)
-      puts "Number of configs found: #{result.length}"
+
+      numToDeploy = 0
+      result.each do |app|
+        numToDeploy += 1 if app[:deploy] == true
+      end
+      puts "Number of configs found: #{result.length} - #{numToDeploy} would deploy"
 
       marathon = Orch::Marathon.new(options)
       chronos = Orch::Chronos.new(options)
       bamboo = Orch::Bamboo.new(options)
       result.each do |app|
-        printf "Name: %s, Type: %s, Deploy?: %s", app[:name], app[:type], app[:deploy]
+        next if app[:deploy] == false
+        printf "Name: %s, Type: %s", app[:name], app[:type]
         app[:env_vars].each do |key, value|
           printf ", %s: %s", key, value
         end
