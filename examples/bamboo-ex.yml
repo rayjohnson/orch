@@ -11,14 +11,14 @@ default_job: &DEFAULT_JOB
     container: &DEFAULT_CONTAINER
       type: "DOCKER"
       docker: &DEFAULT_DOCKER
-        image: "nginx"
+        image: "ypengineering/milieu"
         network: "BRIDGE"
         portMappings: 
           - 
             containerPort: 80
             hostPort: 0
             protocol: "tcp"
-        forcePullImage: false
+        forcePullImage: true
 
 version: 1.0
 deploy_vars:
