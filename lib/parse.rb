@@ -95,7 +95,7 @@ module Orch
       if (! @spec.deploy_vars.nil?)
         @spec.deploy_vars.each do |key, value|
           if app[key].nil?
-            puts "environments_var #{key} specified - but not included in app"
+            puts "deploy_var #{key} specified - but not included in app"
             # TODO: would be nice to put the app name...
             exit 1
           end
@@ -227,6 +227,13 @@ module Orch
           pair = x.split("=")
           spec_str = spec_str.gsub(/{{#{pair[0]}}}/, pair[1])
         end
+      end
+
+      # Check if any substitution variables still exist
+      tag_match = /{{\w+}}/.match(spec_str)
+      if !tag_match.nil?
+        puts "unsubstituted varaibles still remain in spec: #{tag_match.to_s}"
+        exit 1
       end
 
       return spec_str
