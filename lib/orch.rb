@@ -41,7 +41,7 @@ module Orch
            :desc => 'show the json result that would be sent to Chronos or Marathon'
     option :server_verify, :default => true,
            :desc => 'verify the configuration against the server'
-    desc 'verify PATH', 'Checks basic syntax and does not deploy'
+    desc 'verify PATH', 'Checks basic syntax, server configuration and does not deploy'
     def verify(file_name)
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(true)
@@ -95,7 +95,7 @@ module Orch
            :desc => 'url to bamboo server'
     option :subst,
            :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
-    desc 'deploy PATH', 'Deploys config to mesos frameworks.'
+    desc 'deploy PATH', 'Deploys application(s) to mesos frameworks.'
     def deploy(file_name)
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(false)
@@ -138,7 +138,7 @@ module Orch
            :desc => 'url to bamboo server'
     option :subst,
            :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
-    desc 'delete PATH', 'Deletes config from mesos frameworks.'
+    desc 'delete PATH', 'Deletes application(s) from mesos frameworks.'
     def delete(file_name)
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(false)
