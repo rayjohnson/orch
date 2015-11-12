@@ -16,73 +16,79 @@ module Orch
       end
     end
 
-    def check_for_chronos_url
-      if (!  @options.has_key?("chronos_url")) && (@APP_CONFIG.nil? || @APP_CONFIG["chronos_url"].nil?)
-        return false
-      else
-        return true
-      end
-    end
-
-    def check_for_marathon_url
-      if (!  @options.has_key?("marathon_url")) && (@APP_CONFIG.nil? || @APP_CONFIG["marathon_url"].nil?)
-        return false
-      else
-        return true
-      end
-    end
-
-    def check_for_bamboo_url
-      if (!  @options.has_key?("bamboo_url")) && (@APP_CONFIG.nil? || @APP_CONFIG["bamboo_url"].nil?)
-        return false
-      else
-        return true
-      end
-    end
-
-    def chronos_url
+    def chronos_url(spec, app)
       if @options.has_key?("chronos_url")
-        # If passed in on command line override what is in config file
         url = @options["chronos_url"]
         return url
       end
 
-      if @APP_CONFIG.nil? || @APP_CONFIG["chronos_url"].nil?
-        puts "chronos_url not specified, use --chronos_url or set in ~/.orch/config.yml"
-        exit 1
+      if !app.chronos_url.nil?
+        return app.chronos_url
       end
 
-      return @APP_CONFIG["chronos_url"]
+      if !spec.config.nil?
+        if !spec.config.chronos_url.nil?
+          return spec.config.chronos_url
+        end
+      end
+
+      if !@APP_CONFIG.nil?
+        if !@APP_CONFIG["chronos_url"].nil?
+          return @APP_CONFIG["chronos_url"]
+        end
+      end
+
+      return nil
     end
 
-    def marathon_url
+    def marathon_url(spec, app)
       if @options.has_key?("marathon_url")
-        # If passed in on command line override what is in config file
         url = @options["marathon_url"]
         return url
       end
 
-      if @APP_CONFIG.nil? || @APP_CONFIG["marathon_url"].nil?
-        puts "marathon_url not specified, use --marathon_url or set in ~/.orch/config.yml"
-        exit 1
+      if !app.marathon_url.nil?
+        return app.marathon_url
       end
 
-      return @APP_CONFIG["marathon_url"]
+      if !spec.config.nil?
+        if !spec.config.marathon_url.nil?
+          return spec.config.marathon_url
+        end
+      end
+
+      if !@APP_CONFIG.nil?
+        if !@APP_CONFIG["marathon_url"].nil?
+          return @APP_CONFIG["marathon_url"]
+        end
+      end
+
+      return nil
     end
 
-    def bamboo_url
+    def bamboo_url(spec, app)
       if @options.has_key?("bamboo_url")
-        # If passed in on command line override what is in config file
         url = @options["bamboo_url"]
         return url
       end
 
-      if @APP_CONFIG.nil? || @APP_CONFIG["bamboo_url"].nil?
-        puts "bamboo_url not specified, use --bamboo_url or set in ~/.orch/config.yml"
-        exit 1
+      if !app.bamboo_url.nil?
+        return app.bamboo_url
       end
 
-      return @APP_CONFIG["bamboo_url"]
+      if !spec.config.nil?
+        if !spec.config.bamboo_url.nil?
+          return spec.config.bamboo_url
+        end
+      end
+
+      if !@APP_CONFIG.nil?
+        if !@APP_CONFIG["bamboo_url"].nil?
+          return @APP_CONFIG["bamboo_url"]
+        end
+      end
+
+      return nil
     end
 
     def setup_config(settings)

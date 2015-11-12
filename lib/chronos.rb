@@ -14,12 +14,15 @@ end
 module Orch
   class Chronos
     def initialize(options)
-      # TODO: get chronos and marathon urls from diffferent ways: param, env, .config
-      @config = Orch::Config.new(options)
     end
 
-    def deploy(json_payload)
-      uri = URI(@config.chronos_url)
+    def deploy(url, json_payload)
+      if url.nil?
+        puts "chronos_url not defined"
+        exit 1
+      end
+
+      uri = URI(url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
 
@@ -32,49 +35,62 @@ module Orch
       end
 
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.post(path, json_payload, json_headers)
+      begin
+        response = http.post(path, json_payload, json_headers)
+      rescue *HTTP_ERRORS => error
+        http_fault(error)
+      end
 
       if response.code != 204.to_s
         puts "Response #{response.code} #{response.message}: #{response.body}"
       end
 
-      # TODO: handle error codes better?
-
       return response
     end
 
-    def delete(name)
-      uri = URI(@config.chronos_url)
+    def delete(url, name)
+      if url.nil?
+        puts "chronos_url not defined"
+        exit 1
+      end
+
+      uri = URI(url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
 
       # curl -L -X DELETE chronos-node:8080/scheduler/job/request_event_counter_hourly
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.delete("/scheduler/job/#{name}", json_headers)
+      begin
+        response = http.delete("/scheduler/job/#{name}", json_headers)
+      rescue *HTTP_ERRORS => error
+        http_fault(error)
+      end
 
       if response.code != 204.to_s
         puts "Response #{response.code} #{response.message}: #{response.body}"
       end
 
-      # TODO: handle error codes better?
-
       return response
     end
 
-    def verify(json_payload)
-      if @config.check_for_chronos_url == false
+    def verify(url, json_payload)
+      if url.nil?
         puts "no chronos_url - can not verify with server"
         return
       end
 
       spec = Hashie::Mash.new(JSON.parse(json_payload))
 
-      uri = URI(@config.chronos_url)
+      uri = URI(url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
 
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.get("/scheduler/jobs/search?name=#{spec.name}", json_headers)
+      begin
+        response = http.get("/scheduler/jobs/search?name=#{spec.name}", json_headers)
+      rescue *HTTP_ERRORS => error
+        http_fault(error)
+      end
 
       if response.code != 200.to_s
         puts "Response #{response.code} #{response.message}: #{response.body}"
@@ -96,8 +112,6 @@ module Orch
         puts "job \"#{spec.name}\" not currently deployed"
         foundDiffs = true 
       end
-
-      # TODO: handle error codes better?
 
       return foundDiffs
     end

@@ -109,7 +109,7 @@ env:
         ...
 ```
 
-Lower level definitions of an env var will supeceed higher level version.  That is if you specify an env value in the *marathon_spec* or *chronos_spec* level it will override anything set at the *app* or *orch* level.
+Lower level definitions of an env var will superceed a higher level version.  That is if you specify an env value in the *marathon_spec* or *chronos_spec* level it will override anything set at the *app* or *orch* level.
 ### Yaml anchors and aliases
 
 The nice thing about using Yaml as the spec format is the ability to use Yaml's anchors (&) and alias (*) syntax.  This allows you to specify sections of your configuration that can be reused across multiple jobs.  Typically if you have a job for multiple deployment environments you what them all to have the same spec - except perhaps override one or two things.  (Like an envionment value or the docker image.)
@@ -150,12 +150,35 @@ Note: you will also need to set the **bamboo_url:** feild of your configutation.
 
 ## Configuration Options
 
-Run the following command to interactively create a config file.
+There are a few ways to configure orch to know about the urls for various mesos services.  These provide options
+for various automation and deployment scenerios.
+
+The first option is to set up a config file with the urls for your Mesos frameworks.  Run the following command to interactively create a config file.
 ```
 $> orch config
 ```
 
-The file ~/.orch/config.yaml would contain values for "chronos_url" and "marathon_url".  You can also pass --chronos_url or --marathon_url options to the "orch deploy" command to override what is in the config file.
+The file ~/.orch/config.yaml would contain values for "chronos_url" and "marathon_url".
+
+You can also specify the framework urls directly in your configuration.  There are two places in the specification that could the url can be set.  You would use the keys chronos_url:, marathon_url: or bamboo_url:
+Here is an example:
+```
+version: 1.0
+config:
+  chronos_url: http://chronos.mycompany.com:8080
+applications:
+  - kind: Marathon
+    marathon_url: http://marathon.mycompany.com
+    marathon_spec:
+      ...
+    bamboo_url: http://bamboo.mycompany.com
+    bamboo_spec:
+      acl: "hdr(host) -i web.example.com"
+```
+
+A url in the config section would apply to all applications in the specification.  A url at the application level would superceed any definitions in the config section.  This can be useful if you have a specification that needs to deploy to multiple clusters such as in a multi-datacenter scenerio.  Any urls specified in a YAML specification would override those in the .orch/config.yaml file.
+
+Finally, you can also pass --chronos_url or --marathon_url options to the "orch deploy" command to override all other specifications.  You may want to use this option in automated deployment scenerios where you want to manage were things get deployed in another system.
 
 ## Examples
 

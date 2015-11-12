@@ -1,4 +1,5 @@
 require "orch/version"
+require 'util'
 require 'hashie'
 require 'json'
 require 'thor'
@@ -13,7 +14,7 @@ module Orch
 
     desc 'config', 'Interactive way to build ~/.orch/config.yml file'
     def config
-      config = Orch::Config.new(options)
+      $ORCH_CONFIG = Orch::Config.new(options)
 
       if File.file?("#{Dir.home}/.orch/config.yml")
         say "This will over-write your existing ~/.orch/config.yaml file", :yellow
@@ -28,7 +29,7 @@ module Orch
       settings["chronos_url"] = ask("Chronos URL: ")
       settings["bamboo_url"] = ask("Bamboo URL: ")
 
-      config.setup_config(settings)
+      $ORCH_CONFIG.setup_config(settings)
     end
 
     option :deploy_kind, :default => 'all',
@@ -41,8 +42,15 @@ module Orch
            :desc => 'show the json result that would be sent to Chronos or Marathon'
     option :server_verify, :default => true,
            :desc => 'verify the configuration against the server'
+    option :chronos_url,
+           :desc => 'url to chronos master'
+    option :marathon_url,
+           :desc => 'url to marathon master'
+    option :bamboo_url,
+           :desc => 'url to bamboo server'
     desc 'verify PATH', 'Checks basic syntax, server configuration and does not deploy'
     def verify(file_name)
+      $ORCH_CONFIG = Orch::Config.new(options)
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(true)
 
@@ -68,12 +76,12 @@ module Orch
         end
         foundDiffs = false
         if (app[:type] == "Chronos") && (options[:server_verify] == true)
-          foundDiffs = chronos.verify(app[:json].to_json)
+          foundDiffs = chronos.verify(app[:url], app[:json].to_json)
         end
         if (app[:type] == "Marathon") && (options[:server_verify] == true)
-          foundDiffs = marathon.verify(app[:json].to_json)
+          foundDiffs = marathon.verify(app[:url], app[:json].to_json)
           if app[:bamboo_spec]
-            bambooDiffs = bamboo.verify(app[:name], app[:bamboo_spec])
+            bambooDiffs = bamboo.verify(app[:bamboo_url], app[:name], app[:bamboo_spec])
             foundDiffs = foundDiffs || bambooDiffs
           end
         end
@@ -87,16 +95,17 @@ module Orch
            :desc => 'deploys only the given application kind: chronos, marathon, all'
     option :deploy_var, :default => 'all',
            :desc => 'DEPLOY_VAR=VALUE deploys only if a deploy_var matches the given value'
+    option :subst,
+           :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
     option :chronos_url,
            :desc => 'url to chronos master'
     option :marathon_url,
            :desc => 'url to marathon master'
     option :bamboo_url,
            :desc => 'url to bamboo server'
-    option :subst,
-           :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
     desc 'deploy PATH', 'Deploys application(s) to mesos frameworks.'
     def deploy(file_name)
+      $ORCH_CONFIG = Orch::Config.new(options)
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(false)
 
@@ -115,12 +124,12 @@ module Orch
         puts "deploying #{app[:name]} to #{app[:type]}"
         #puts "#{app[:json]}"  - should I support show_json here as well?
         if app[:type] == "Chronos"
-          chronos.deploy(app[:json].to_json)
+          chronos.deploy(app[:url], app[:json].to_json)
         end
         if app[:type] == "Marathon"
-          marathon.deploy(app[:name], app[:json].to_json)
+          marathon.deploy(app[:url], app[:name], app[:json].to_json)
           if app[:bamboo_spec]
-            bamboo.deploy(app[:name], app[:bamboo_spec])
+            bamboo.deploy(app[:bamboo_url], app[:name], app[:bamboo_spec])
           end
         end
       end
@@ -130,16 +139,17 @@ module Orch
            :desc => 'deletes only the given application kind: chronos, marathon, all'
     option :deploy_var, :default => 'all',
            :desc => 'DEPLOY_VAR=VALUE deletes only if a deploy_var matches the given value'
+    option :subst,
+           :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
     option :chronos_url,
            :desc => 'url to chronos master'
     option :marathon_url,
            :desc => 'url to marathon master'
     option :bamboo_url,
            :desc => 'url to bamboo server'
-    option :subst,
-           :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
     desc 'delete PATH', 'Deletes application(s) from mesos frameworks.'
     def delete(file_name)
+      $ORCH_CONFIG = Orch::Config.new(options)
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(false)
 
@@ -158,12 +168,12 @@ module Orch
         end
         puts "deleting #{app[:name]} from #{app[:type]}"
         if app[:type] == "Chronos"
-          chronos.delete(app[:name])
+          chronos.delete(app[:url], app[:name])
         end
         if app[:type] == "Marathon"
-          marathon.delete(app[:name])
+          marathon.delete(app[:url], app[:name])
           if app[:bamboo_spec]
-            bamboo.delete(app[:name])
+            bamboo.delete(app[:url], app[:name])
           end
         end
       end
@@ -179,6 +189,7 @@ module Orch
            :desc => 'KEY=VALUE substitute KEY with VALUE globaly in your config'
     desc 'restart PATH', 'Restarts specified application(s) on server'
     def restart(file_name)
+      $ORCH_CONFIG = Orch::Config.new(options)
       parser = Orch::Parse.new(file_name, options)
       result = parser.parse(false)
 
@@ -194,7 +205,7 @@ module Orch
         end
         puts "restarting #{app[:name]} on #{app[:type]}"
         if app[:type] == "Marathon"
-          marathon.restart(app[:name])
+          marathon.restart(app[:url], app[:name])
         end
       end
     end

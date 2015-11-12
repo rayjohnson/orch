@@ -14,11 +14,15 @@ end
 module Orch
   class Bamboo
     def initialize(options)
-      @config = Orch::Config.new(options)
     end
 
-    def deploy(app_id, bamboo_spec)
-      uri = URI(@config.bamboo_url)
+    def deploy(url, app_id, bamboo_spec)
+      if url.nil?
+        puts "bamboo_url not defined"
+        exit 1
+      end
+
+      uri = URI(url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
 
@@ -30,7 +34,11 @@ module Orch
   # curl -i -X PUT -d '{"id":"/ExampleAppGroup/app1", "acl":"path_beg -i /group/app-1"}' http://localhost:8000/api/services//ExampleAppGroup/app1
 # {"/adam-web-dev":{"Id":"/adam-web-dev","Acl":"hdr(host) -i adam-web-dev.ypec.int.yp.com"
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.put("/api/services/#{app_id}", bamboo_json.to_json, json_headers)
+      begin
+        response = http.put("/api/services/#{app_id}", bamboo_json.to_json, json_headers)
+      rescue *HTTP_ERRORS => error
+        http_fault(error)
+      end
 
       if response.code == 200.to_s
         puts "successfully created bamboo spec for marathon job: #{app_id}"
@@ -41,37 +49,48 @@ module Orch
       return response
     end
 
-    def delete(app_id)
-      uri = URI(@config.chronos_url)
+    def delete(url, app_id)
+      if url.nil?
+        puts "bamboo_url not defined"
+        exit 1
+      end
+
+      uri = URI(url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
 
       puts "curl -i -X DELETE #{uri}/api/services/#{app_id}"
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.delete("/api/services/#{app_id}", json_headers)
+      begin
+        response = http.delete("/api/services/#{app_id}", json_headers)
+      rescue *HTTP_ERRORS => error
+        http_fault(error)
+      end
 
       if response.code != 200.to_s
         puts "Response #{response.code} #{response.message}: #{response.body}"
       end
 
-      # TODO: handle error codes better?
-
       return response
     end
 
-    def verify(app_id, spec)
-      if @config.check_for_bamboo_url == false
+    def verify(url, app_id, spec)
+      if url.nil?
         puts "no bamboo_url - can not verify with server"
         return
       end
 
-      uri = URI(@config.bamboo_url)
+      uri = URI(url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
 
       # TODO: will this work or do I need to parse through all services like chronos
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.get("/api/services", json_headers)
+      begin
+        response = http.get("/api/services", json_headers)
+      rescue *HTTP_ERRORS => error
+        http_fault(error)
+      end
 
       if response.code != 200.to_s
         puts "Response #{response.code} #{response.message}: #{response.body}"

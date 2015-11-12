@@ -14,17 +14,24 @@ end
 module Orch
   class Marathon
     def initialize(options)
-      # TODO: get chronos and marathon urls from diffferent ways: param, env, .config
-      @config = Orch::Config.new(options)
     end
 
-    def deploy(app_id, json_payload)
-      uri = URI(@config.marathon_url)
+    def deploy(url, app_id, json_payload)
+      if url.nil?
+        puts "marathon_url not defined"
+        exit 1
+      end
+
+      uri = URI(url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
 
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.put("/v2/apps/#{app_id}", json_payload, json_headers)
+      begin
+        response = http.put("/v2/apps/#{app_id}", json_payload, json_headers)
+      rescue *HTTP_ERRORS => error
+        http_fault(error)
+      end
 
       # TODO: should we do anyting with version or deploymentId that gets returned?
       if response.code == 201.to_s
@@ -38,13 +45,22 @@ module Orch
       return response
     end
 
-    def delete(id)
-      uri = URI(@config.marathon_url)
+    def delete(url, id)
+      if url.nil?
+        puts "marathon_url not defined"
+        exit 1
+      end
+
+      uri = URI(url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
 
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.delete("/v2/apps/#{id}", json_headers)
+      begin
+        response = http.delete("/v2/apps/#{id}", json_headers)
+      rescue *HTTP_ERRORS => error
+        http_fault(error)
+      end
 
       if response.code == 200.to_s
         puts "successfully deleted #{id}"
@@ -57,20 +73,24 @@ module Orch
       return response
     end
 
-    def verify(json_payload)
-      if @config.check_for_marathon_url == false
+    def verify(url, json_payload)
+      if url.nil?
         puts "no marathon_url - can not verify with server"
         return
       end
 
       spec = Hashie::Mash.new(JSON.parse(json_payload))
 
-      uri = URI(@config.marathon_url)
+      uri = URI(url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
 
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.get("/v2/apps/#{spec.id}", json_headers)
+      begin
+        response = http.get("/v2/apps/#{spec.id}", json_headers)
+      rescue *HTTP_ERRORS => error
+        http_fault(error)
+      end
 
       if response.code == 200.to_s
         job = Hashie::Mash.new(JSON.parse(response.body))
@@ -86,14 +106,24 @@ module Orch
       return foundDiffs
     end
 
-    def restart(app_id)
+    def restart(url, app_id)
+      if url.nil?
+        puts "marathon_url not defined"
+        exit 1
+      end
+
+      uri = URI(url)
+
       # POST /v2/apps/{appId}/restart: Rolling restart of all tasks of the given app
-      uri = URI(@config.marathon_url)
       json_headers = {"Content-Type" => "application/json",
                 "Accept" => "application/json"}
 
       http = Net::HTTP.new(uri.host, uri.port)
-      response = http.post("/v2/apps/#{app_id}/restart", {}.to_json, json_headers)
+      begin
+        response = http.post("/v2/apps/#{app_id}/restart", {}.to_json, json_headers)
+      rescue *HTTP_ERRORS => error
+        http_fault(error)
+      end
 
       if response.code == 200.to_s
         puts "success"

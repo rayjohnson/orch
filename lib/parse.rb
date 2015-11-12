@@ -68,18 +68,34 @@ module Orch
         if (app.kind == "Chronos")
           chronos_spec = parse_chronos(app, app_var_values)
 
-          result = {:name => chronos_spec["name"], :type => app.kind, :deploy => should_deploy?(app), :env_vars => deploy_vars, :json => chronos_spec}
+          result = {
+            :name => chronos_spec["name"], 
+            :type => app.kind, 
+            :deploy => should_deploy?(app), 
+            :env_vars => deploy_vars, 
+            :json => chronos_spec,
+            :url => $ORCH_CONFIG.chronos_url(spec, app)
+          }
+
           results << result
         end
 
         if (app.kind == "Marathon")
           marathon_spec = parse_marathon(app, app_var_values)
 
-          result = {:name => marathon_spec["id"], :type => app.kind, :deploy => should_deploy?(app), :env_vars => deploy_vars, :json => marathon_spec}
+          result = {
+            :name => marathon_spec["id"], 
+            :type => app.kind, 
+            :deploy => should_deploy?(app), 
+            :env_vars => deploy_vars, 
+            :json => marathon_spec,
+            :url => $ORCH_CONFIG.marathon_url(spec, app)
+          }
 
           if app.bamboo_spec
             bamboo_spec = parse_bamboo(app, app_var_values)
             result[:bamboo_spec] = bamboo_spec
+            result[:bamboo_url] = $ORCH_CONFIG.bamboo_url(spec, app)
           end
 
           results << result
