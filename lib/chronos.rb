@@ -18,8 +18,7 @@ module Orch
 
     def deploy(url, json_payload)
       if url.nil?
-        puts "chronos_url not defined"
-        exit 1
+        exit_with_msg "chronos_url not defined"
       end
 
       uri = URI(url)
@@ -30,8 +29,7 @@ module Orch
       path = "/scheduler/iso8601" unless json_payload["schedule"].nil?
       path = "/scheduler/dependency" unless json_payload["parents"].nil?
       if path.nil?
-        puts "neither schedule nor parents fields defined for Chronos job"
-        exit 1
+        exit_with_msg "neither schedule nor parents fields defined for Chronos job"
       end
 
       http = Net::HTTP.new(uri.host, uri.port)
@@ -50,8 +48,7 @@ module Orch
 
     def delete(url, name)
       if url.nil?
-        puts "chronos_url not defined"
-        exit 1
+        exit_with_msg "chronos_url not defined"
       end
 
       uri = URI(url)

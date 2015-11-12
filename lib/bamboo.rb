@@ -18,8 +18,7 @@ module Orch
 
     def deploy(url, app_id, bamboo_spec)
       if url.nil?
-        puts "bamboo_url not defined"
-        exit 1
+        exit_with_msg "bamboo_url not defined"
       end
 
       uri = URI(url)
@@ -51,8 +50,7 @@ module Orch
 
     def delete(url, app_id)
       if url.nil?
-        puts "bamboo_url not defined"
-        exit 1
+        exit_with_msg "bamboo_url not defined"
       end
 
       uri = URI(url)

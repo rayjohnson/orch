@@ -8,15 +8,13 @@ module Orch
 
     def initialize(path, options)
       if ! File.file?(path)
-        puts "file does not exist: #{path}"
-        exit 1
+        exit_with_msg "file does not exist: #{path}"
       end
 
       begin
         yaml = ::YAML.load_file(path)
       rescue Psych::SyntaxError => e
-        puts "error parsing yaml file #{e}"
-        exit 1
+        exit_with_msg "error parsing yaml file #{e}"
       end
 
       @options = options
@@ -39,21 +37,18 @@ module Orch
       end
 
       if spec.applications.nil?
-        puts "required section applications: must have at least one application defined"
-        exit 1
+        exit_with_msg "required section applications: must have at least one application defined"
       end
 
       results = []
       spec.applications.each do |app|
         # Check for valid kind paramter
         if app.kind.nil?
-          puts "required field 'kind:' was not found"
-          exit 1
+          exit_with_msg "required field 'kind:' was not found"
         end
 
         if !(app.kind == "Chronos" || app.kind == "Marathon")
-          puts "unsupported kind specified: #{app.kind} - must be: Chronos | Marathon"
-          exit 1
+          exit_with_msg "unsupported kind specified: #{app.kind} - must be: Chronos | Marathon"
         end
 
         # Generate any deploy variables that need to be merged in
@@ -111,13 +106,11 @@ module Orch
       if (! @spec.deploy_vars.nil?)
         @spec.deploy_vars.each do |key, value|
           if app[key].nil?
-            puts "deploy_var #{key} specified - but not included in app"
+            exit_with_msg "deploy_var #{key} specified - but not included in app"
             # TODO: would be nice to put the app name...
-            exit 1
           end
           if ! @spec.deploy_vars[key].include? app[key]
-            puts "#{key} value \"#{app[key]}\" not in #{@spec.deploy_vars[key].to_s}"
-            exit 1
+            exit_with_msg "#{key} value \"#{app[key]}\" not in #{@spec.deploy_vars[key].to_s}"
           end
           result[key] = app[key]
         end
@@ -140,8 +133,7 @@ module Orch
 
     def parse_chronos(app, env_var_values)
       if app.chronos_spec.nil?
-        puts "App of kind: Chronos requires a 'chronos_spec:' field"
-        exit 1
+        exit_with_msg "App of kind: Chronos requires a 'chronos_spec:' field"
       end
       chronos_spec = app.chronos_spec
 
@@ -167,8 +159,7 @@ module Orch
 
     def parse_marathon(app, env_var_values)
       if app.marathon_spec.nil?
-        puts "App of kind: Marathon requires a 'marathon_spec:' field"
-        exit 1
+        exit_with_msg "App of kind: Marathon requires a 'marathon_spec:' field"
       end
       marathon_spec = app.marathon_spec
 
@@ -181,8 +172,7 @@ module Orch
       if marathon_spec.id
         marathon_spec.id = (marathon_spec.id[0] == '/') ? marathon_spec.id : ("/" + marathon_spec.id)
       else
-        puts "id: is a required field for a marathon spec"
-        exit 1
+        exit_with_msg "id: is a required field for a marathon spec"
       end
 
       spec_str = do_subst(marathon_spec, app)
@@ -215,8 +205,7 @@ module Orch
           deployVar = pair[0]
           deployVal = pair[1]
           if app[deployVar].nil?
-            puts "environment var of '#{deployVar}' not found in app"
-            exit 1
+            exit_with_msg "environment var of '#{deployVar}' not found in app"
           end
           if app[deployVar] != deployVal
             result = false
@@ -248,8 +237,7 @@ module Orch
       # Check if any substitution variables still exist
       tag_match = /{{\w+}}/.match(spec_str)
       if !tag_match.nil?
-        puts "unsubstituted varaibles still remain in spec: #{tag_match.to_s}"
-        exit 1
+        exit_with_msg "unsubstituted varaibles still remain in spec: #{tag_match.to_s}"
       end
 
       return spec_str
@@ -259,8 +247,7 @@ module Orch
 
       # Check for valid version paramter
       if @spec.version.nil?
-        puts "required field version was not found"
-        exit 1
+        exit_with_msg "required field version was not found"
       end
 
       if @spec.version == "alpha1"
@@ -270,8 +257,7 @@ module Orch
 
         number = Float( @spec.version ) rescue nil
         if number.nil? 
-          puts "invalid value \"#{@spec.version}\" for version field of spec"
-          exit 1
+          exit_with_msg "invalid value \"#{@spec.version}\" for version field of spec"
         end
         version = number
       end
@@ -289,8 +275,7 @@ module Orch
       end
 
       if ! ['chronos', 'marathon', 'all'].include?(@options[:deploy_kind])
-        puts "value of --deploy-type was #{@options[:deploy_kind]}, must be chronos, marathon or all"
-        exit 1
+        exit_with_msg "value of --deploy-type was #{@options[:deploy_kind]}, must be chronos, marathon or all"
       end
     end
   end

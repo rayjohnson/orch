@@ -18,8 +18,7 @@ module Orch
 
     def deploy(url, app_id, json_payload)
       if url.nil?
-        puts "marathon_url not defined"
-        exit 1
+        exit_with_msg "marathon_url not defined"
       end
 
       uri = URI(url)
@@ -47,8 +46,7 @@ module Orch
 
     def delete(url, id)
       if url.nil?
-        puts "marathon_url not defined"
-        exit 1
+        exit_with_msg "marathon_url not defined"
       end
 
       uri = URI(url)
@@ -108,8 +106,7 @@ module Orch
 
     def restart(url, app_id)
       if url.nil?
-        puts "marathon_url not defined"
-        exit 1
+        exit_with_msg "marathon_url not defined"
       end
 
       uri = URI(url)
