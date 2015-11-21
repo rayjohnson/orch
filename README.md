@@ -180,6 +180,8 @@ A url in the config section would apply to all applications in the specification
 
 Finally, you can also pass --chronos_url or --marathon_url options to the "orch deploy" command to override all other specifications.  You may want to use this option in automated deployment scenerios where you want to manage were things get deployed in another system.
 
+In more robust implementations you may have a list of redundant frameworks you can deploy to.  All of these configurations support passing a semi-colon seperated list of URLs.  If network related errors occur Orch will attempt to call additional specified URLs.  Also, if your framework has basic auth credentials required you may specify those credentials in the config like this:  http://user:password@myframework.mycompany.com
+
 ## Examples
 
 The examples directory contains various examples of the features of orch.  

@@ -16,14 +16,10 @@ module Orch
     def initialize(options)
     end
 
-    def deploy(url, json_payload)
-      if url.nil?
+    def deploy(url_list, json_payload)
+      if url_list.nil?
         exit_with_msg "chronos_url not defined"
       end
-
-      uri = URI(url)
-      json_headers = {"Content-Type" => "application/json",
-                "Accept" => "application/json"}
 
       path = nil
       path = "/scheduler/iso8601" unless json_payload["schedule"].nil?
@@ -32,12 +28,7 @@ module Orch
         exit_with_msg "neither schedule nor parents fields defined for Chronos job"
       end
 
-      http = Net::HTTP.new(uri.host, uri.port)
-      begin
-        response = http.post(path, json_payload, json_headers)
-      rescue *HTTP_ERRORS => error
-        http_fault(error)
-      end
+      response = http_post(url_list, path, json_payload, JSON_HEADERS)
 
       if response.code != 204.to_s
         puts "Response #{response.code} #{response.message}: #{response.body}"
@@ -46,22 +37,13 @@ module Orch
       return response
     end
 
-    def delete(url, name)
-      if url.nil?
+    def delete(url_list, name)
+      if url_list.nil?
         exit_with_msg "chronos_url not defined"
       end
 
-      uri = URI(url)
-      json_headers = {"Content-Type" => "application/json",
-                "Accept" => "application/json"}
-
       # curl -L -X DELETE chronos-node:8080/scheduler/job/request_event_counter_hourly
-      http = Net::HTTP.new(uri.host, uri.port)
-      begin
-        response = http.delete("/scheduler/job/#{name}", json_headers)
-      rescue *HTTP_ERRORS => error
-        http_fault(error)
-      end
+      response = http_delete(url_list, "/scheduler/job/#{name}", JSON_HEADERS)
 
       if response.code != 204.to_s
         puts "Response #{response.code} #{response.message}: #{response.body}"
@@ -70,24 +52,15 @@ module Orch
       return response
     end
 
-    def verify(url, json_payload)
-      if url.nil?
+    def verify(url_list, json_payload)
+      if url_list.nil?
         puts "no chronos_url - can not verify with server"
         return
       end
 
       spec = Hashie::Mash.new(JSON.parse(json_payload))
 
-      uri = URI(url)
-      json_headers = {"Content-Type" => "application/json",
-                "Accept" => "application/json"}
-
-      http = Net::HTTP.new(uri.host, uri.port)
-      begin
-        response = http.get("/scheduler/jobs/search?name=#{spec.name}", json_headers)
-      rescue *HTTP_ERRORS => error
-        http_fault(error)
-      end
+      response = http_get(url_list, "/scheduler/jobs/search?name=#{spec.name}", JSON_HEADERS)
 
       if response.code != 200.to_s
         puts "Response #{response.code} #{response.message}: #{response.body}"

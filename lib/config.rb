@@ -17,74 +17,40 @@ module Orch
     end
 
     def chronos_url(spec, app)
-      if @options.has_key?("chronos_url")
-        url = @options["chronos_url"]
-        return url
-      end
-
-      if !app.chronos_url.nil?
-        return app.chronos_url
-      end
-
-      if !spec.config.nil?
-        if !spec.config.chronos_url.nil?
-          return spec.config.chronos_url
-        end
-      end
-
-      if !@APP_CONFIG.nil?
-        if !@APP_CONFIG["chronos_url"].nil?
-          return @APP_CONFIG["chronos_url"]
-        end
-      end
-
-      return nil
+      return key_search("chronos_url", spec, app)
     end
 
     def marathon_url(spec, app)
-      if @options.has_key?("marathon_url")
-        url = @options["marathon_url"]
-        return url
-      end
-
-      if !app.marathon_url.nil?
-        return app.marathon_url
-      end
-
-      if !spec.config.nil?
-        if !spec.config.marathon_url.nil?
-          return spec.config.marathon_url
-        end
-      end
-
-      if !@APP_CONFIG.nil?
-        if !@APP_CONFIG["marathon_url"].nil?
-          return @APP_CONFIG["marathon_url"]
-        end
-      end
-
-      return nil
+      return key_search("marathon_url", spec, app)
     end
 
     def bamboo_url(spec, app)
-      if @options.has_key?("bamboo_url")
-        url = @options["bamboo_url"]
+      return key_search("bamboo_url", spec, app)
+    end
+
+    def key_search(key, spec, app)
+      # First look if key was passed in as option
+      if @options.has_key?(key)
+        url = @options[key]
         return url
       end
 
-      if !app.bamboo_url.nil?
-        return app.bamboo_url
+      # Second look in the application level spec
+      if !app[key].nil?
+        return app[key]
       end
 
+      # Third look in the config portion of the spec
       if !spec.config.nil?
-        if !spec.config.bamboo_url.nil?
-          return spec.config.bamboo_url
+        if !spec.config[key].nil?
+          return spec.config[key]
         end
       end
 
+      # Forth look in the config file
       if !@APP_CONFIG.nil?
-        if !@APP_CONFIG["bamboo_url"].nil?
-          return @APP_CONFIG["bamboo_url"]
+        if !@APP_CONFIG[key].nil?
+          return @APP_CONFIG[key]
         end
       end
 
