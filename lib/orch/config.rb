@@ -11,15 +11,15 @@ class Orch::Config
   end
 
   def chronos_url(spec, app)
-    return key_search("chronos_url", spec, app)
+    key_search("chronos_url", spec, app)
   end
 
   def marathon_url(spec, app)
-    return key_search("marathon_url", spec, app)
+    key_search("marathon_url", spec, app)
   end
 
   def bamboo_url(spec, app)
-    return key_search("bamboo_url", spec, app)
+    key_search("bamboo_url", spec, app)
   end
 
   def key_search(key, spec, app)
@@ -47,8 +47,6 @@ class Orch::Config
         return @APP_CONFIG[key]
       end
     end
-
-    return nil
   end
 
   def setup_config(settings)

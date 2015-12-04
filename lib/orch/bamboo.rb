@@ -24,7 +24,7 @@ class Orch::Bamboo
       puts "Response #{response.code} #{response.message}: #{response.body}"
     end
 
-    return response
+    response
   end
 
   def delete(url_list, app_id)
@@ -38,7 +38,7 @@ class Orch::Bamboo
       puts "Response #{response.code} #{response.message}: #{response.body}"
     end
 
-    return response
+    response
   end
 
   def verify(url_list, app_id, spec)
@@ -82,7 +82,7 @@ class Orch::Bamboo
 
     # TODO: handle error codes better?
 
-    return foundDiffs
+    foundDiffs
   end
 
 end

@@ -21,7 +21,7 @@ class Orch::Chronos
       puts "Response #{response.code} #{response.message}: #{response.body}"
     end
 
-    return response
+    response
   end
 
   def delete(url_list, name)
@@ -36,7 +36,7 @@ class Orch::Chronos
       puts "Response #{response.code} #{response.message}: #{response.body}"
     end
 
-    return response
+    response
   end
 
   def verify(url_list, json_payload)
@@ -70,7 +70,7 @@ class Orch::Chronos
       foundDiffs = true 
     end
 
-    return foundDiffs
+    foundDiffs
   end
 
   def find_diffs(spec, job)
@@ -118,6 +118,6 @@ class Orch::Chronos
       end
     end
 
-    return foundDiff
+    foundDiff
   end
 end

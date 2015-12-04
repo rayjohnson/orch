@@ -94,7 +94,7 @@ class Orch::Parse
 
     end
 
-    return results
+    results
   end
 
   def parse_deploy_vars(app)
@@ -112,7 +112,7 @@ class Orch::Parse
       end
     end
 
-    return result
+    result
   end
 
   def parse_vault_vars(spec)
@@ -124,7 +124,7 @@ class Orch::Parse
         count += 1
       end
     end
-    return result
+    result
   end
 
   def parse_chronos(app, env_var_values)
@@ -148,9 +148,8 @@ class Orch::Parse
 
     # Do subst processing
     spec_str = do_subst(chronos_spec, app)
-    chronos_spec = JSON.parse(spec_str)
 
-    return chronos_spec
+    JSON.parse(spec_str)
   end
 
   def parse_marathon(app, env_var_values)
@@ -172,9 +171,8 @@ class Orch::Parse
     end
 
     spec_str = do_subst(marathon_spec, app)
-    marathon_spec = JSON.parse(spec_str)
 
-    return marathon_spec
+    JSON.parse(spec_str)
   end
 
   def parse_bamboo(app, env_var_values)
@@ -186,7 +184,7 @@ class Orch::Parse
       puts "required field 'acl:' missing from bamboo_spec"
     end
 
-    return bamboo_spec
+    bamboo_spec
   end
 
   def should_deploy?(app)
@@ -209,7 +207,7 @@ class Orch::Parse
       end
     end
 
-    return result
+    result
   end
 
   def do_subst(spec, app)
@@ -236,7 +234,7 @@ class Orch::Parse
       exit_with_msg "unsubstituted varaibles still remain in spec: #{tag_match.to_s}"
     end
 
-    return spec_str
+    spec_str
   end
 
   def check_version

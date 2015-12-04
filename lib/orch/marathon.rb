@@ -22,7 +22,7 @@ class Orch::Marathon
       puts "Response #{response.code} #{response.message}: #{response.body}"
     end
 
-    return response
+    response
   end
 
   def delete(url_list, id)
@@ -40,7 +40,7 @@ class Orch::Marathon
       puts "Response #{response.code} #{response.message}: #{response.body}"
     end
 
-    return response
+    response
   end
 
   def verify(url_list, json_payload)
@@ -67,7 +67,7 @@ class Orch::Marathon
       foundDiffs = true 
     end
 
-    return foundDiffs
+    foundDiffs
   end
 
   def restart(url_list, app_id)
@@ -84,7 +84,7 @@ class Orch::Marathon
       puts "Response #{response.code} #{response.message}: #{response.body}"
     end
 
-    return response
+    response
   end
 
   def find_diffs(spec, job)
@@ -127,6 +127,6 @@ class Orch::Marathon
       end
     end
 
-    return foundDiff
+    foundDiff
   end  
 end
