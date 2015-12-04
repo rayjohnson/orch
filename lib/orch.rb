@@ -56,9 +56,9 @@ module Orch
       end
       puts "Number of configs found: #{result.length} - #{numToDeploy} would deploy"
 
-      marathon = Orch::Marathon.new(options)
-      chronos = Orch::Chronos.new(options)
-      bamboo = Orch::Bamboo.new(options)
+      marathon = Orch::Marathon.new
+      chronos = Orch::Chronos.new
+      bamboo = Orch::Bamboo.new
       result.each do |app|
         next if app[:deploy] == false
         printf "Name: %s, Type: %s", app[:name], app[:type]
@@ -109,9 +109,9 @@ module Orch
         puts "nothing found to deploy"
       end
 
-      marathon = Orch::Marathon.new(options)
-      chronos = Orch::Chronos.new(options)
-      bamboo = Orch::Bamboo.new(options)
+      marathon = Orch::Marathon.new
+      chronos = Orch::Chronos.new
+      bamboo = Orch::Bamboo.new
       result.each do |app|
         if !app[:deploy]
           puts "skipping app: #{app[:name]}"
@@ -153,9 +153,9 @@ module Orch
         puts "nothing found to delete"
       end
 
-      marathon = Orch::Marathon.new(options)
-      chronos = Orch::Chronos.new(options)
-      bamboo = Orch::Bamboo.new(options)
+      marathon = Orch::Marathon.new
+      chronos = Orch::Chronos.new
+      bamboo = Orch::Bamboo.new
 
       result.each do |app|
         if !app[:deploy]
@@ -193,7 +193,7 @@ module Orch
         puts "nothing found to restart"
       end
 
-      marathon = Orch::Marathon.new(options)
+      marathon = Orch::Marathon.new
       result.each do |app|
         if !app[:deploy] || (app[:type] == "Chronos")
           puts "skipping app: #{app[:name]}"
