@@ -4,6 +4,7 @@ require 'net/http'
 require 'uri'
 
 require 'config'
+require 'orch/util'
 
 class String
   def numeric?
@@ -13,8 +14,8 @@ end
 
 module Orch
   class Bamboo
-    def initialize(options)
-    end
+
+    include Orch::Util
 
     def deploy(url_list, app_id, bamboo_spec)
       if url_list.nil?
