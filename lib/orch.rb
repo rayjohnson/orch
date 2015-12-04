@@ -1,13 +1,7 @@
-require "orch/version"
-require 'util'
 require 'hashie'
 require 'json'
 require 'thor'
 require "yaml"
-require "parse"
-require "chronos"
-require "marathon"
-require "bamboo"
 
 module Orch
   class Application < Thor
@@ -211,3 +205,11 @@ module Orch
     end
   end
 end
+
+require 'orch/util'
+require "orch/parse"
+require "orch/chronos"
+require "orch/marathon"
+require "orch/bamboo"
+require "orch/version"
+

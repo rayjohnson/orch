@@ -3,7 +3,7 @@ require 'json'
 require 'net/http'
 require 'uri'
 
-require 'config'
+require 'orch/config'
 require 'orch/util'
 
 class String
