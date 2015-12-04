@@ -1,6 +1,6 @@
-CURRENT_SPEC_VERSION=1.0
-
 class Orch::Parse
+
+  CURRENT_SPEC_VERSION=1.0
 
   def initialize(path, options)
     if ! File.file?(path)
