@@ -1,7 +1,3 @@
-# config
-
-require 'yaml'
-
 module Orch
   class Config
     def initialize(options)

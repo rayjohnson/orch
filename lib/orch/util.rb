@@ -1,6 +1,3 @@
-require 'net/http'
-require 'uri'
-
 module Orch::Util
   HTTP_ERRORS = [
     EOFError,

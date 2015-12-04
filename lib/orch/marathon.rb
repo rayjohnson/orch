@@ -1,8 +1,4 @@
 # Marathon interface object
-require 'json'
-
-require 'orch/config'
-require "orch/util"
 
 class String
   def numeric?

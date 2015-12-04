@@ -2,6 +2,8 @@ require 'hashie'
 require 'json'
 require 'thor'
 require "yaml"
+require 'net/http'
+require 'uri'
 
 module Orch
   class Application < Thor

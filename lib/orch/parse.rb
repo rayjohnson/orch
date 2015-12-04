@@ -1,6 +1,3 @@
-require 'yaml'
-require 'json'
-
 CURRENT_SPEC_VERSION=1.0
 
 module Orch
