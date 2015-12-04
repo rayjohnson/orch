@@ -121,13 +121,11 @@ module Orch::Util
   end
 
   def http_fault(error)
-    STDERR.puts "Fatal networking error talking to framework: #{error.to_s}"
-    exit 1
+    raise "Fatal networking error talking to framework: #{error.to_s}"
   end
 
   def exit_with_msg(err_msg)
-    STDERR.puts err_msg
-    exit 1
+    raise err_msg
   end
 
   def to_float str

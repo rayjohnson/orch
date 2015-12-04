@@ -15,9 +15,7 @@ module Orch
       if File.file?("#{Dir.home}/.orch/config.yml")
         say "This will over-write your existing ~/.orch/config.yaml file", :yellow
         answer = yes? "Proceed?", :yellow
-        if answer == false
-          exit 0
-        end
+        exit 0 if answer == false
       end
       say("Enter values to construct a ~/.orch/config.yaml file")
       settings = {}
