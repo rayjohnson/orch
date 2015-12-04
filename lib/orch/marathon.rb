@@ -1,7 +1,5 @@
 # Marathon interface object
 require 'json'
-require 'net/http'
-require 'uri'
 
 require 'orch/config'
 require "orch/util"

@@ -1,6 +1,5 @@
 # config
 
-require 'json'
 require 'yaml'
 
 module Orch
