@@ -27,12 +27,13 @@ class Orch::Marathon
 
     response = http_delete(url_list, "/v2/apps/#{id}", JSON_HEADERS)
 
-    if response.code == '200'
+    code = response.code
+    if code == '200'
       puts "successfully deleted #{id}"
-    elsif response.code == '404'
+    elsif code == '404'
       puts "job: #{id} - does not exist to delete"
     else
-      puts "Response #{response.code} #{response.message}: #{response.body}"
+      puts "Response #{code} #{response.message}: #{response.body}"
     end
 
     response
@@ -66,17 +67,16 @@ class Orch::Marathon
   end
 
   def restart(url_list, app_id)
-    if url_list.nil?
-      exit_with_msg "marathon_url not defined"
-    end
+    raise Orch::MarathonError, 'marathon_url not defined' unless url_list
 
     # POST /v2/apps/{appId}/restart: Rolling restart of all tasks of the given app
     response = http_post(url_list, "/v2/apps/#{app_id}/restart", {}.to_json, JSON_HEADERS)
 
-    if response.code == 200.to_s
+    code = response.code
+    if code == 200.to_s
       puts "success"
     else
-      puts "Response #{response.code} #{response.message}: #{response.body}"
+      puts "Response #{code} #{response.message}: #{response.body}"
     end
 
     response

@@ -16,6 +16,14 @@ class TestMarathon < OrchTest
       .returns(ret)
   end
 
+  def setup_mock_restart ret
+    @cls
+      .any_instance
+      .expects(:http_post)
+      .with(@url, "/v2/apps/#{@app}/restart", '{}', @cls::JSON_HEADERS)
+      .returns(ret)
+  end
+
   def setup_mock_put ret
     @cls
       .any_instance
@@ -71,6 +79,18 @@ class TestMarathon < OrchTest
     end
   end
 
+  def test_deploy_unknown_response
+    mock_failure = mock 'teapot' do
+      expects(:code).returns('418')
+      expects(:body).returns('chickens')
+      expects(:message).returns('coooooooowwwwssss')
+    end
+
+    setup_mock_put mock_failure
+
+    @cls.new.deploy @url, @app, ''
+  end
+
   def test_delete_raises_marathon_error
     assert_raises Orch::MarathonError do
       @cls.new.delete nil, nil
@@ -89,12 +109,52 @@ class TestMarathon < OrchTest
 
   def test_delete_404
     mock_failure = mock 'notfound' do
-      expects(:code).returns('404').twice
+      expects(:code).returns('404')
     end
 
     setup_mock_delete mock_failure
 
     @cls.new.delete @url, @app
+  end
+
+  def test_delete_unknown_response
+    mock_failure = mock 'teapot' do
+      expects(:code).returns('418')
+      expects(:body).returns('lemon')
+      expects(:message).returns('limes')
+    end
+
+    setup_mock_delete mock_failure
+
+    @cls.new.delete @url, @app
+  end
+
+  def test_restart_raises_marathon_error
+    assert_raises Orch::MarathonError do
+      @cls.new.restart nil, nil
+    end
+  end
+
+  def test_restart_200
+    mock_success = mock 'success' do
+      expects(:code).returns('200')
+    end
+
+    setup_mock_restart mock_success
+
+    @cls.new.restart @url, @app
+  end
+
+  def test_restart_unknown_response
+    mock_failure = mock 'teapot' do
+      expects(:code).returns('418')
+      expects(:body).returns('lemon')
+      expects(:message).returns('limes')
+    end
+
+    setup_mock_restart mock_failure
+
+    @cls.new.restart @url, @app
   end
 
 end
