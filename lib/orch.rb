@@ -207,6 +207,7 @@ module Orch
 end
 
 require "orch/config"
+require 'orch/errors'
 require 'orch/util'
 require "orch/parse"
 require "orch/chronos"
