@@ -1,6 +1,7 @@
 require './lib/orch'
 
 require 'minitest/autorun'
+require 'mocha/mini_test'
 
 class OrchTest < Minitest::Test
 

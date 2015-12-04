@@ -4,37 +4,32 @@ class Orch::Marathon
   include Orch::Util
 
   def deploy(url_list, app_id, json_payload)
-    if url_list.nil?
-      exit_with_msg "marathon_url not defined"
-    end
+    raise Orch::MarathonError, 'marathon_url not defined' unless url_list
 
     response = http_put(url_list, "/v2/apps/#{app_id}", json_payload, JSON_HEADERS)
 
     # TODO: should we do anyting with version or deploymentId that gets returned?
-    if response.code == 201.to_s
+    code = response.code
+    if code == '201' || code == '200'
       puts "successfully created marathon job: #{app_id}"
-    elsif response.code == 200.to_s
-      puts "successfully updated marathon job: #{app_id}"
-    elsif response.code == 401.to_s
-      puts "Authentication required"
-      exit 1
+    elsif code == '401'
+      raise Orch::AuthenticationError,
+        "Response Status: #{code} Body: #{response.body}"
     else
-      puts "Response #{response.code} #{response.message}: #{response.body}"
+      puts "Response #{code} #{response.message}: #{response.body}"
     end
 
     response
   end
 
   def delete(url_list, id)
-    if url_list.nil?
-      exit_with_msg "marathon_url not defined"
-    end
+    raise Orch::MarathonError, 'marathon_url not defined' unless url_list
 
     response = http_delete(url_list, "/v2/apps/#{id}", JSON_HEADERS)
 
-    if response.code == 200.to_s
+    if response.code == '200'
       puts "successfully deleted #{id}"
-    elsif response.code == 404.to_s
+    elsif response.code == '404'
       puts "job: #{id} - does not exist to delete"
     else
       puts "Response #{response.code} #{response.message}: #{response.body}"
