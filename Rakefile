@@ -12,5 +12,13 @@ task :clean do
   FileUtils.rm_r Dir.glob('./pkg/*')
 end
 
+desc 'Run irb with gem loaded and happy'
+task :irb do
+  ARGV.clear
+  require './lib/orch'
+  require 'irb'
+  IRB.start
+end
+
 desc "Run tests"
 task :default => :test
