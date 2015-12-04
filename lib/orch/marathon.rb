@@ -56,10 +56,10 @@ class Orch::Marathon
       exit 1
     elsif response.code == 404.to_s
       puts "job: #{spec.id} - not defined in Marathon"
-      foundDiffs = true 
+      foundDiffs = true
     else
       puts "Response #{response.code} #{response.message}: #{response.body}"
-      foundDiffs = true 
+      foundDiffs = true
     end
 
     foundDiffs
@@ -123,5 +123,5 @@ class Orch::Marathon
     end
 
     foundDiff
-  end  
+  end
 end
