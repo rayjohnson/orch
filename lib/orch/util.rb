@@ -129,4 +129,8 @@ module Orch::Util
     STDERR.puts err_msg
     exit 1
   end
+
+  def to_float str
+    Float(str) rescue ArgumentError
+  end
 end

@@ -1,11 +1,4 @@
 # Marathon interface object
-
-class String
-  def numeric?
-    Float(self) != nil rescue false
-  end
-end
-
 class Orch::Marathon
 
   include Orch::Util
@@ -122,8 +115,8 @@ class Orch::Marathon
       end
       specVal = spec[key]
       jobVal = job[key]
-      if spec[key].to_s.numeric?
-        specVal = Float(spec[key])
+      if spec_val_float = to_float(spec[key].to_s)
+        specVal = spec_val_float
         jobVal = Float(job[key])
       end
       if specVal != jobVal

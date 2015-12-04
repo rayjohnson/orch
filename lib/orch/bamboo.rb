@@ -1,11 +1,5 @@
 # Chronos interface object
 
-class String
-  def numeric?
-    Float(self) != nil rescue false
-  end
-end
-
 class Orch::Bamboo
 
   include Orch::Util

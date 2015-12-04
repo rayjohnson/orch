@@ -1,11 +1,4 @@
 # Chronos interface object
-
-class String
-  def numeric?
-    Float(self) != nil rescue false
-  end
-end
-
 class Orch::Chronos
 
   include Orch::Util
@@ -102,8 +95,8 @@ class Orch::Chronos
       end
       specVal = spec[key]
       jobVal = job[key]
-      if spec[key].to_s.numeric?
-        specVal = Float(spec[key])
+      if spec_val_float = to_float(spec[key].to_s)
+        specVal = spec_val_float
         jobVal = Float(job[key])
       else
         specVal = spec[key]
