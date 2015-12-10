@@ -2,4 +2,17 @@
 
 require 'orch'
 
-Orch::Application.start(ARGV)
+begin
+  Orch::Application.start(ARGV)
+rescue Orch::UserError => err
+  warn "#{err.class}: #{err.message}"
+rescue => err
+  puts
+  warn "**** OOPS - Something went wrong :( ****"
+  warn "Please submit a bug report to:"
+  puts
+  warn "https://github.com/rayjohnson/orch/issues"
+  puts
+  warn "with the command you ran, your *.yml file, and the following stack trace:"
+  raise err
+end

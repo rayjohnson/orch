@@ -13,8 +13,7 @@ class Orch::Marathon
     if code == '201' || code == '200'
       puts "successfully created marathon job: #{app_id}"
     elsif code == '401'
-      raise Orch::AuthenticationError,
-        "Response Status: #{code} Body: #{response.body}"
+      raise Orch::AuthenticationError.new code, response.body, url_list
     else
       puts "Response #{code} #{response.message}: #{response.body}"
     end
