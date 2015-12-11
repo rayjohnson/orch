@@ -129,6 +129,6 @@ module Orch::Util
   end
 
   def to_float str
-    Float(str) rescue ArgumentError
+    Float(str) rescue ArgumentError; nil
   end
 end
