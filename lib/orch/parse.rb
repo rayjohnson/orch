@@ -1,5 +1,7 @@
 class Orch::Parse
 
+  include Orch::Util
+
   CURRENT_SPEC_VERSION=1.0
 
   def initialize(path, options)
