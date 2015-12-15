@@ -1,13 +1,9 @@
-require "orch/version"
-require 'util'
 require 'hashie'
 require 'json'
 require 'thor'
 require "yaml"
-require "parse"
-require "chronos"
-require "marathon"
-require "bamboo"
+require 'net/http'
+require 'uri'
 
 module Orch
   class Application < Thor
@@ -19,9 +15,7 @@ module Orch
       if File.file?("#{Dir.home}/.orch/config.yml")
         say "This will over-write your existing ~/.orch/config.yaml file", :yellow
         answer = yes? "Proceed?", :yellow
-        if answer == false
-          exit 0
-        end
+        exit 0 if answer == false
       end
       say("Enter values to construct a ~/.orch/config.yaml file")
       settings = {}
@@ -60,9 +54,9 @@ module Orch
       end
       puts "Number of configs found: #{result.length} - #{numToDeploy} would deploy"
 
-      marathon = Orch::Marathon.new(options)
-      chronos = Orch::Chronos.new(options)
-      bamboo = Orch::Bamboo.new(options)
+      marathon = Orch::Marathon.new
+      chronos = Orch::Chronos.new
+      bamboo = Orch::Bamboo.new
       result.each do |app|
         next if app[:deploy] == false
         printf "Name: %s, Type: %s", app[:name], app[:type]
@@ -113,9 +107,9 @@ module Orch
         puts "nothing found to deploy"
       end
 
-      marathon = Orch::Marathon.new(options)
-      chronos = Orch::Chronos.new(options)
-      bamboo = Orch::Bamboo.new(options)
+      marathon = Orch::Marathon.new
+      chronos = Orch::Chronos.new
+      bamboo = Orch::Bamboo.new
       result.each do |app|
         if !app[:deploy]
           puts "skipping app: #{app[:name]}"
@@ -157,9 +151,9 @@ module Orch
         puts "nothing found to delete"
       end
 
-      marathon = Orch::Marathon.new(options)
-      chronos = Orch::Chronos.new(options)
-      bamboo = Orch::Bamboo.new(options)
+      marathon = Orch::Marathon.new
+      chronos = Orch::Chronos.new
+      bamboo = Orch::Bamboo.new
 
       result.each do |app|
         if !app[:deploy]
@@ -197,7 +191,7 @@ module Orch
         puts "nothing found to restart"
       end
 
-      marathon = Orch::Marathon.new(options)
+      marathon = Orch::Marathon.new
       result.each do |app|
         if !app[:deploy] || (app[:type] == "Chronos")
           puts "skipping app: #{app[:name]}"
@@ -211,3 +205,13 @@ module Orch
     end
   end
 end
+
+require "orch/config"
+require 'orch/errors'
+require 'orch/util'
+require "orch/parse"
+require "orch/chronos"
+require "orch/marathon"
+require "orch/bamboo"
+require "orch/version"
+
